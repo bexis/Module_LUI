@@ -1,4 +1,5 @@
-﻿using BExIS.IO.Transform.Output;
+﻿using BExIS.Dlm.Services.Helpers;
+using BExIS.IO.Transform.Output;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -350,7 +351,10 @@ namespace BExIS.Modules.Lui.UI.Models
             Dlm.Entities.Data.DatasetVersion dsv = dsm.GetDatasetLatestVersion(dsId);
 
             // convert
-            DataTable dt = OutputDataManager.ConvertPrimaryDataToDatatable(dsm, dsv, "LUI input data", true );
+            //DataTable dt = OutputDataManager.ConvertPrimaryDataToDatatable(dsm, dsv, "LUI input data", true ); => not woking anymore
+
+            DatasetConvertor datasetConvertor = new DatasetConvertor();
+            DataTable dt = datasetConvertor.ConvertDatasetVersion(dsm, dsv, "LUI input data");
 
             // set column shortcuts
             foreach (DataColumn col in dt.Columns)
