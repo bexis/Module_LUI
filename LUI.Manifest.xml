@@ -15,7 +15,7 @@
     <Export tag="menubar" id="luiMenu" order="10"
             title="LUI" description="LUI desc" icon=""
             controller="main" action="index"
-            extends="./menubarRoot" />
+            extends="./menubarRoot/Data Tools" />
     
 	<!-- Settings Example-->
     <!--<Export tag="settings" id="manageMetadata" order="1"
