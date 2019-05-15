@@ -26,10 +26,15 @@ namespace BExIS.Modules.Lui.UI.Helper
 
 
             }
-            catch
+            catch (Exception ex)
             {
+                throw ex;
             }
-
+            finally
+            {
+                featureManager.Dispose();
+                operationManager.Dispose();
+            }
 
         }
 
