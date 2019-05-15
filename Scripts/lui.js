@@ -4,7 +4,8 @@
 
     const $dataEl = $('#divQuery0')
     datasetId = $dataEl.data('datasetid'),
-        showdataUrl = $dataEl.data('showdataurl');
+    versionId = $dataEl.data('versionid'),
+    showdataUrl = $dataEl.data('showdataurl');
 
     /* XXXXXXXXXXXXXXXXXXXXXXXXXX Event Handlers XXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
@@ -34,7 +35,8 @@
                     method: 'get',
                     url: showdataUrl,
                     data: {
-                        datasetID: datasetId
+                        datasetID: datasetId,
+                        versionId: versionId
                     }
                 })
                     .done(function (data) {
