@@ -3,7 +3,7 @@ using System;
 using Vaiona.Logging;
 using Vaiona.Web.Mvc.Modularity;
 
-namespace BExIS.Modules.Lui.UI
+namespace BEXIS.Modules.Lui.UI
 {
     public class LUIModule : ModuleBase
     {
@@ -39,7 +39,10 @@ namespace BExIS.Modules.Lui.UI
             try
             {
                 base.Install();
-                LUISeedDataGenerator.CreateFeatures();
+                using (var luiSeedDataGenerator = new LUISeedDataGenerator())
+                {
+                    luiSeedDataGenerator.GenerateSeedData();
+                }
             }
             catch (Exception e)
             {
