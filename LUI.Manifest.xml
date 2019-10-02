@@ -11,11 +11,16 @@
   </Dependencies>
   <Exports>
     <!--add proper menu items-->
+
+    <Export tag="menubar" id="dataTools" order="4"
+           title="Data Tools" description="data tool desc" icon=""
+           controller="main" action="index"
+           extends="./menubarRoot" />
 	
-    <Export tag="menubar" id="luiMenu" order="10"
+    <Export tag="menubar" id="luiMenu" order="1"
             title="LUI" description="LUI desc" icon=""
             controller="main" action="index"
-            extends="./menubarRoot/Data Tools" />
+            extends="./menubarRoot/dataTools" />
     
 	<!-- Settings Example-->
     <!--<Export tag="settings" id="manageMetadata" order="1"
