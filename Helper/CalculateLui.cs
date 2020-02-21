@@ -3,6 +3,7 @@ using BExIS.IO.Transform.Output;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 
@@ -75,7 +76,7 @@ namespace BExIS.Modules.Lui.UI.Models
                 {
                     // fill the select expression to retrieve the means
                     // based on year selection
-                    slctdYrExpression = "(Year = " + slctdYr + ")";
+                    slctdYrExpression = "(Year =' " + DateTime.ParseExact(slctdYr, "yyyy", CultureInfo.InvariantCulture) + "')";
 
                     // -------------------------------------------
                     // regional way
@@ -101,7 +102,7 @@ namespace BExIS.Modules.Lui.UI.Models
                                 {
                                     // calculate only for selected years AND selected exploratories
                                     // yearwise + exploratorywise
-                                    if ((row["Year"].ToString() == slctdYr) && (row["Exploratory"].ToString() == explo))
+                                    if (DateTime.Parse(row["Year"].ToString()).Year.ToString() == slctdYr && (row["Exploratory"].ToString() == explo))
                                     {
                                         string plotid = row["EP_PlotID"].ToString();
 
@@ -152,7 +153,7 @@ namespace BExIS.Modules.Lui.UI.Models
                             if (EpLevel || (MipLevel & row["isMIP"].ToString() == "yes") || (VipLevel & row["isVIP"].ToString() == "yes"))
                             {
                                 // calculate only for selected years
-                                if (row["Year"].ToString() == slctdYr)
+                                if (DateTime.Parse(row["Year"].ToString()).Year.ToString() == slctdYr)
                                 {
                                     string plotid = row["EP_PlotID"].ToString();
 
@@ -189,11 +190,11 @@ namespace BExIS.Modules.Lui.UI.Models
 
                 // fill the select expression 4 retrieving the means based on year selection
                 // fill the yearsConcat string
-                slctdYrExpression = "(Year = " + selectedYearList[0];
+                slctdYrExpression = "(Year = '" + selectedYearList[0] + "'";
                 yearsConcat = selectedYearList[0];
                 for (int i = 1; i < selectedYearList.Count; i++)
                 {
-                    slctdYrExpression = slctdYrExpression + " OR Year = " + selectedYearList[i];
+                    slctdYrExpression = slctdYrExpression + " OR Year = '" + selectedYearList[i];
                     yearsConcat = yearsConcat + ", " + selectedYearList[i];
                 }
                 slctdYrExpression = slctdYrExpression + ")";
@@ -359,6 +360,7 @@ namespace BExIS.Modules.Lui.UI.Models
             // set column shortcuts
             foreach (DataColumn col in dt.Columns)
             {
+             
                 col.ColumnName = col.Caption;
             }
 
