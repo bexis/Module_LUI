@@ -13,12 +13,12 @@
     <!--add proper menu items-->
 
     <Export tag="menubar" id="dataTools" order="4"
-           title="Data Tools" description="data tool desc" icon=""
+           title="Tools" description="data tool desc" icon=""
            controller="main" action="index"
            extends="./menubarRoot" />
 	
     <Export tag="menubar" id="luiMenu" order="1"
-            title="LUI" description="LUI desc" icon=""
+            title="LUI Calculation" description="LUI desc" icon=""
             controller="main" action="index"
             extends="./menubarRoot/dataTools" />
     
