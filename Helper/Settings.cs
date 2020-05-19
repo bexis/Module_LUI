@@ -10,7 +10,7 @@ namespace BExIS.Modules.Lui.UI.Models
     public class Settings
     {
 
-        private static String filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), "settings.xml");
+        private static String filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), "Lui.settings.xml");
         private static Dictionary<string,object> settings = new Dictionary<string, object>();
 
         /// <summary>

@@ -11,6 +11,12 @@ namespace BExIS.Modules.Lui.UI.Models
 {
     public class CalculateLui
     {
+        public enum ComponentsSet
+        {
+            Old,
+            New
+        };
+
         public static DataTable DoCalc(LUIQueryModel model)
         {
             // -----------------------------------------------------------------------------------------
@@ -19,7 +25,7 @@ namespace BExIS.Modules.Lui.UI.Models
             //
 
             // source data
-            DataTable dt_sourceData = GetSourceLUIData();
+            DataTable dt_sourceData = GetSourceLUIData(model.ComponentsSet.SelectedValue);
 
             // result data
             DataTable dt_rslts = MakeResultsDT();
@@ -342,10 +348,19 @@ namespace BExIS.Modules.Lui.UI.Models
         /// retrieve Source Data necessary for LUI calculation
         /// </summary>
         /// <returns></returns>
-        private static DataTable GetSourceLUIData()
+        private static DataTable GetSourceLUIData(string componentsSet)
         {
             // get dataset ID
-            int dsId = (int)Settings.get("lui:dataset");
+            int dsId = 0;
+            switch (componentsSet)
+            {
+                case "Old": 
+                dsId = (int)Settings.get("lui:datasetOldComponentsSet");
+                break;
+                case "New":
+                dsId = (int)Settings.get("lui:datasetNewComponentsSet");
+                break;
+            }
 
             // get dataset
             Dlm.Services.Data.DatasetManager dsm = new Dlm.Services.Data.DatasetManager();

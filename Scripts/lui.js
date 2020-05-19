@@ -1,15 +1,54 @@
 ﻿!function () {
 
+    
+
     /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Setup XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
-    const $dataEl = $('#divQuery0')
-    datasetId = $dataEl.data('datasetid'),
-    versionId = $dataEl.data('versionid'),
-    showdataUrl = $dataEl.data('showdataurl');
+    const $dataEl = $('#divQuery0'),
+    datasetIdOld = $dataEl.data('datasetidold'),
+        datasetIdNew = $dataEl.data('datasetidnew'),
+        versionIdOld = $dataEl.data('versionidold'),
+        versionIdNew = $dataEl.data('versionidnew'),
+        showdataUrl = $dataEl.data('showdataurl');
+
+        console.log($dataEl.data());
 
     /* XXXXXXXXXXXXXXXXXXXXXXXXXX Event Handlers XXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
-    /* ------------------------------ Query 0 ------------------------------ */
+    var datasetId = datasetIdNew;
+    var versionId= versionIdNew;
+
+    /* ------------------------------ Query 00 ------------------------------ */
+
+    $('#divQuery00 input')
+        .on('change', function () {
+
+             // hide all further steps
+            $('#divQuery1, #divQuery2, #divQuery3, #divQuery4, #btnCalculateLUI').hide();
+            $("#divResultButtons").hide();
+
+            //uncheck query0
+             $("#divQuery0 input[type='radio']").prop("checked", false); 
+
+            //get datasetId
+            var selecteddataset = $(this).val();
+            console.log(datasetIdOld);
+            console.log(selecteddataset);
+
+            if (selecteddataset == "Old") {
+                
+                datasetId = datasetIdOld ;
+                versionId = versionIdOld;
+            }
+            else {
+                datasetId = datasetIdNew;
+                versionId = versionIdNew;
+            }
+
+
+        });
+
+/* ------------------------------ Query 0 ------------------------------ */
 
     $('#divQuery0 input')
         .on('change', function () {
@@ -18,6 +57,7 @@
             $('#divQuery1, #divQuery2, #divQuery3, #divQuery4, #btnCalculateLUI').hide();
             $("#divResultButtons").hide();
 
+            
             // get selected option
             var selected = $(this).val();
 

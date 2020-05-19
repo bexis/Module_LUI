@@ -10,6 +10,8 @@ using System.IO;
 using BExIS.IO.Transform.Output;
 using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
+using System.Web.Routing;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -26,6 +28,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
         // namespace for download files
         private static string FILE_NAMESPACE = Settings.get("lui:filename:namespace") as string;
         #endregion
+
+        public int selectedDatasetId = 0;
+        public int selectedDataStructureId = 0;
 
         // GET: Main
         public ActionResult Index()
@@ -49,6 +54,18 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
         }
 
+        public ActionResult ShowPrimaryData(long datasetID, int versionId)
+
+        {
+            var view = this.Render("DDM", "Data", "ShowPrimaryData", new RouteValueDictionary()
+            {
+                { "datasetID", datasetID },
+                { "versionId", versionId }
+            });
+
+            return Content(view.ToHtmlString(), "text/html");
+        }
+
         /// <summary>
         /// trigger calculation of LUI values
         /// </summary>
@@ -59,6 +76,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
         {
             // set page title
             ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
+
+            if(model.ComponentsSet.SelectedValue == "Old")
+                selectedDataStructureId = (int)Settings.get("lui:datastructureOldComponentsSet");
+            else
+                selectedDataStructureId = (int)Settings.get("lui:datastructureNewComponentsSet");
 
             // do the calucaltion
             var results = CalculateLui.DoCalc(model);
@@ -99,7 +121,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             filename += "_" + unixTimestamp;
 
             // datastructure ID
-            int dsId = (int)Settings.get("lui:datastructure");
+            //int dsId = (int)Settings.get("lui:datastructure");
 
             // depends on the requested type
             string path = "";
@@ -107,12 +129,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 case "text/csv":
                 case "text/tsv":
-                    path = outputDataManager.GenerateAsciiFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, mimeType, dsId);
+                    path = outputDataManager.GenerateAsciiFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, mimeType, selectedDataStructureId);
                     break;
 
                 case "application/vnd.ms-excel.sheet.macroEnabled.12":
                 case "application/vnd.ms-excel":
-                    path = outputDataManager.GenerateExcelFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, dsId);
+                    path = outputDataManager.GenerateExcelFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, selectedDataStructureId);
                     break;
 
                 default:
@@ -167,11 +189,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns></returns>
         private bool checkPreconditions()
         {
-            // check for LUI dataset
+            // check for LUI new dataset
             DatasetManager dm = new DatasetManager();
-            int luiId = (int)Settings.get("lui:dataset");
+            int luiIdNew = (int)Settings.get("lui:datasetNewComponentsSet");
             bool exists = dm.DatasetRepo.Query()
-                                        .Where(x => x.Id == luiId )
+                                        .Where(x => x.Id == luiIdNew )
                                         .Any();
             if (!exists)
             {
@@ -180,11 +202,32 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // check for export data structure
             DataStructureManager dsm = new DataStructureManager();
-            int dsdId = (int)Settings.get("lui:datastructure");
+            int dsdId = (int)Settings.get("lui:datastructureNewComponentsSet");
             exists = dsm.StructuredDataStructureRepo.Query()
                                     .Where(x => x.Id == dsdId)
                                     .Any();
             if(!exists)
+            {
+                return false;
+            }
+
+            // check for LUI old dataset
+            int luiIdOld = (int)Settings.get("lui:datasetOldComponentsSet");
+            exists = dm.DatasetRepo.Query()
+                                        .Where(x => x.Id == luiIdOld)
+                                        .Any();
+            if (!exists)
+            {
+                return false;
+            }
+
+            // check for export data structure
+      
+            int dsdIdOld = (int)Settings.get("lui:datastructureOldComponentsSet");
+            exists = dsm.StructuredDataStructureRepo.Query()
+                                    .Where(x => x.Id == dsdIdOld)
+                                    .Any();
+            if (!exists)
             {
                 return false;
             }

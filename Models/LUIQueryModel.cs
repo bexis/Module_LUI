@@ -14,6 +14,9 @@ namespace BExIS.Modules.Lui.UI.Models
         public List<CheckboxControlHelper> Years { get; set; }
         public RadioButtonControlHelper TypeOfMean { get; set; }
         public RadioButtonControlHelper Plotlevel { get; set; }
+        //public CalculateLui.ComponentsSet ComponentsSet { get; set; }
+
+        public RadioButtonControlHelper ComponentsSet { get; set; }
 
 
         public LUIQueryModel()
@@ -25,6 +28,12 @@ namespace BExIS.Modules.Lui.UI.Models
             Years = new List<CheckboxControlHelper>();
             TypeOfMean = new RadioButtonControlHelper();
             Plotlevel = new RadioButtonControlHelper();
+            ComponentsSet = new RadioButtonControlHelper();
+
+            //fill ComponentsSet
+            ComponentsSet.SelectedValue = "New";
+            ComponentsSet.Values = new List<string>() { "Old", "New" };
+
 
             // fill RawVsCalc
             RawVsCalc.SelectedValue = null;
