@@ -14,7 +14,7 @@
   <entry key="lui:versionIdNewComponentsSet" value="18" type="int"/>
   
   <entry key="lui:years:min" value="2006" type="int" />
-  <entry key="lui:years:max" value="2016" type="int" />
+  <entry key="lui:years:max" value="2018" type="int" />
   <entry key="lui:filename:download" value="results" type="string" />
   <entry key="lui:filename:namespace" value="LUI" type="string" />
 
