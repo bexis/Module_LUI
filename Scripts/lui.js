@@ -35,7 +35,7 @@
             console.log(datasetIdOld);
             console.log(selecteddataset);
 
-            if (selecteddataset == "Old") {
+            if (selecteddataset == "OldSet") {
                 
                 datasetId = datasetIdOld ;
                 versionId = versionIdOld;

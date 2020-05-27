@@ -77,7 +77,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // set page title
             ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
-            if(model.ComponentsSet.SelectedValue == "Old")
+            if(model.ComponentsSet.SelectedValue == "OldSet")
                 selectedDataStructureId = (int)Settings.get("lui:datastructureOldComponentsSet");
             else
                 selectedDataStructureId = (int)Settings.get("lui:datastructureNewComponentsSet");
