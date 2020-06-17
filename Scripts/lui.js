@@ -27,6 +27,8 @@
             $('#divQuery1, #divQuery2, #divQuery3, #divQuery4, #btnCalculateLUI').hide();
             $("#divResultButtons").hide();
 
+            $('#divResultGrid').empty();
+
             //uncheck query0
              $("#divQuery0 input[type='radio']").prop("checked", false); 
 
