@@ -32,7 +32,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         #endregion
 
         public int selectedDatasetId = 0;
-        public int selectedDataStructureId = 0;
+        //public int selectedDataStructureId = 0;
 
         // GET: Main
         public ActionResult Index()
@@ -79,10 +79,16 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // set page title
             ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
-            if(model.ComponentsSet.SelectedValue == "OldSet")
+            long selectedDataStructureId;
+
+            Session["DataStructureId"] = null;
+
+            if (model.ComponentsSet.SelectedValue == "OldSet")
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
             else
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
+
+            Session["DataStructureId"] = selectedDataStructureId;
 
             // do the calucaltion
             var results = CalculateLui.DoCalc(model);
@@ -111,6 +117,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 return Json(new { error = false, mimeType = mimeType }, JsonRequestBehavior.AllowGet);
             }
+            long selectedDataStructureId = 0;
+            if (Session["DataStructureId"] != null)
+                selectedDataStructureId = (long)Session["DataStructureId"];
 
             // helper class
             OutputDataManager outputDataManager = new OutputDataManager();
