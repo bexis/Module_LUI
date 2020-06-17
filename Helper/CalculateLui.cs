@@ -354,10 +354,10 @@ namespace BExIS.Modules.Lui.UI.Models
             int dsId = 0;
             switch (componentsSet)
             {
-                case "Old": 
+                case "OldSet": 
                 dsId = (int)Settings.get("lui:datasetOldComponentsSet");
                 break;
-                case "New":
+                case "NewSet":
                 dsId = (int)Settings.get("lui:datasetNewComponentsSet");
                 break;
             }
