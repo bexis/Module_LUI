@@ -13,10 +13,12 @@
                     new { @autocomplete= "off" })
                )
         {
-        <td style="width: 500px; vertical-align:top;">
+        <td style="width: 600px; vertical-align:top;">
 
-            @Html.ActionLink("Download HowTo", "DownloadFile", "CalculateLUI", new { area = "DTM", path = "LUI\\HowToLUI.pdf", mimeType = "application/pdf" }, new { @class = "bx-button small function" })
-            @Html.ActionLink("Download Work Flow", "DownloadFile", "CalculateLUI", new { area = "DTM", path = "LUI\\WorkFlowLUI.pdf", mimeType = "application/pdf" }, new { @class = "bx-button small function" })
+            @Html.ActionLink("Download How To", "DownloadPDF", new { fileName = "HowToLUI.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            @Html.ActionLink("Download Work Flow", "DownloadPDF", new { fileName = "WorkFlowLUI.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            @Html.ActionLink("Download Info about new components set", "DownloadPDF", new { fileName = "NewCalcInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            @Html.ActionLink("Download Documentation about changes", "DownloadPDF", new { fileName = "ChangesDocu.pdf" }, new { @class = "bx-button small function", target = "_blank" })
 
             <div id="divQuery00" class="dtm-divBox">
                 <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
@@ -94,7 +96,7 @@
                     }
                 </div>
 
-                <p class="dtm-para_green">Please select one or more years you want to calculate the LUI for.</p>
+                <p class="dtm-para_green">Please select one or more years you want to calculate the LUI for. Old set has only years up to 2016.</p>
                 <button type="button" data-selectall-target="#divQuery2_2" class="dtm-selectall bx-button smaller function">
                     <span class="dtm-selectall">Select all</span>
                     <span>Deselect all</span>

@@ -12,6 +12,8 @@ using BExIS.Dlm.Services.Data;
 using BExIS.Dlm.Services.DataStructure;
 using System.Web.Routing;
 using Vaiona.Web.Mvc.Modularity;
+using Vaiona.Utils.Cfg;
+using System.Web;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -26,7 +28,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private static string SESSION_FILE = "lui:resultFile";
 
         // namespace for download files
-        private static string FILE_NAMESPACE = Settings.get("lui:filename:namespace") as string;
+        private static string FILE_NAMESPACE = Models.Settings.get("lui:filename:namespace") as string;
         #endregion
 
         public int selectedDatasetId = 0;
@@ -78,9 +80,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
             ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
             if(model.ComponentsSet.SelectedValue == "OldSet")
-                selectedDataStructureId = (int)Settings.get("lui:datastructureOldComponentsSet");
+                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
             else
-                selectedDataStructureId = (int)Settings.get("lui:datastructureNewComponentsSet");
+                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
 
             // do the calucaltion
             var results = CalculateLui.DoCalc(model);
@@ -115,7 +117,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // filename
             // use unix timestamp to make filenames unique
-            string filename = Settings.get("lui:filename:download") as string;
+            string filename = Models.Settings.get("lui:filename:download") as string;
             // https://stackoverflow.com/a/17632585/1169798
             Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
             filename += "_" + unixTimestamp;
@@ -180,7 +182,16 @@ namespace BExIS.Modules.Lui.UI.Controllers
             return File(path, mimeType, Path.GetFileName(path));
         }
 
-    
+        public ActionResult DownloadPDF(string fileName)
+        {
+            string path = "LUI\\";
+
+            var filePath = Path.Combine(AppConfiguration.DataPath, path, fileName);
+            Response.AddHeader("Content-Disposition", "inline; filename=" + fileName);
+            return File(filePath, MimeMapping.GetMimeMapping(fileName));
+        }
+
+
         /// <summary>
         /// check for preconditions, so that we can do all computations
         /// * Link to LUI dataset
@@ -191,7 +202,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         {
             // check for LUI new dataset
             DatasetManager dm = new DatasetManager();
-            int luiIdNew = (int)Settings.get("lui:datasetNewComponentsSet");
+            int luiIdNew = (int)Models.Settings.get("lui:datasetNewComponentsSet");
             bool exists = dm.DatasetRepo.Query()
                                         .Where(x => x.Id == luiIdNew )
                                         .Any();
@@ -202,7 +213,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // check for export data structure
             DataStructureManager dsm = new DataStructureManager();
-            int dsdId = (int)Settings.get("lui:datastructureNewComponentsSet");
+            int dsdId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
             exists = dsm.StructuredDataStructureRepo.Query()
                                     .Where(x => x.Id == dsdId)
                                     .Any();
@@ -212,7 +223,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
 
             // check for LUI old dataset
-            int luiIdOld = (int)Settings.get("lui:datasetOldComponentsSet");
+            int luiIdOld = (int)Models.Settings.get("lui:datasetOldComponentsSet");
             exists = dm.DatasetRepo.Query()
                                         .Where(x => x.Id == luiIdOld)
                                         .Any();
@@ -223,7 +234,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // check for export data structure
       
-            int dsdIdOld = (int)Settings.get("lui:datastructureOldComponentsSet");
+            int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
             exists = dsm.StructuredDataStructureRepo.Query()
                                     .Where(x => x.Id == dsdIdOld)
                                     .Any();
