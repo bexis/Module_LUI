@@ -174,6 +174,7 @@
   <ItemGroup>
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Helper\CalculateLui.cs" />
+    <Compile Include="Helper\DownloadManager.cs" />
     <Compile Include="Helper\LUISeedDataGenerator.cs" />
     <Compile Include="Helper\Settings.cs" />
     <Compile Include="LUIModule.cs" />

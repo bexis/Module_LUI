@@ -14,6 +14,7 @@ using System.Web.Routing;
 using Vaiona.Web.Mvc.Modularity;
 using Vaiona.Utils.Cfg;
 using System.Web;
+using BExIS.Modules.Lui.UI.Helper;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -122,7 +123,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 selectedDataStructureId = (long)Session["DataStructureId"];
 
             // helper class
-            OutputDataManager outputDataManager = new OutputDataManager();
+            DownloadManager downloadManager = new DownloadManager();
 
             // filename
             // use unix timestamp to make filenames unique
@@ -140,12 +141,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 case "text/csv":
                 case "text/tsv":
-                    path = outputDataManager.GenerateAsciiFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, mimeType, selectedDataStructureId);
+                    path = downloadManager.GenerateAsciiFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, mimeType);
                     break;
 
                 case "application/vnd.ms-excel.sheet.macroEnabled.12":
                 case "application/vnd.ms-excel":
-                    path = outputDataManager.GenerateExcelFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, selectedDataStructureId);
+                    //path = outputDataManager.GenerateExcelFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, selectedDataStructureId);
                     break;
 
                 default:

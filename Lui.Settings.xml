@@ -6,13 +6,13 @@
 
   <!-- LUI settings -->
   <entry key="lui:datasetOldComponentsSet" value="19266" type="int"/>
-  <entry key="lui:datastructureOldComponentsSet" value="6" type="int"/>
-  <entry key="lui:versionIdOldComponentsSet" value="15" type="int"/>
+  <entry key="lui:datastructureOldComponentsSet" value="2" type="int"/>
+  <entry key="lui:versionIdOldComponentsSet" value="5" type="int"/>
 
   <entry key="lui:datasetNewComponentsSet" value="25086" type="int"/>
-  <entry key="lui:datastructureNewComponentsSet" value="7" type="int"/>
-  <entry key="lui:versionIdNewComponentsSet" value="18" type="int"/>
-  
+  <entry key="lui:datastructureNewComponentsSet" value="3" type="int"/>
+  <entry key="lui:versionIdNewComponentsSet" value="8" type="int"/>
+
   <entry key="lui:years:min" value="2006" type="int" />
   <entry key="lui:years:max" value="2018" type="int" />
   <entry key="lui:filename:download" value="results" type="string" />
@@ -21,6 +21,6 @@
   <entry key="lui:msg:alb" type="string" value="" />
   <entry key="lui:msg:hai" type="string" value="" />
   <entry key="lui:msg:sch" type="string" value="" />
-  
-  
+
+
 </settings>
