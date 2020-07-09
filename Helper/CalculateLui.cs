@@ -196,14 +196,14 @@ namespace BExIS.Modules.Lui.UI.Models
 
                 // fill the select expression 4 retrieving the means based on year selection
                 // fill the yearsConcat string
-                slctdYrExpression = "(Year = '" + selectedYearList[0] + "'";
+                slctdYrExpression = "(Year = '" + DateTime.ParseExact(selectedYearList[0], "yyyy", CultureInfo.InvariantCulture) + "'";
                 yearsConcat = selectedYearList[0];
                 for (int i = 1; i < selectedYearList.Count; i++)
                 {
-                    slctdYrExpression = slctdYrExpression + " OR Year = '" + selectedYearList[i];
-                    yearsConcat = yearsConcat + ", " + selectedYearList[i];
+                    slctdYrExpression = slctdYrExpression + " OR Year = '" + DateTime.ParseExact(selectedYearList[0], "yyyy", CultureInfo.InvariantCulture);
+                    yearsConcat = yearsConcat + ", " + DateTime.ParseExact(selectedYearList[0], "yyyy", CultureInfo.InvariantCulture);
                 }
-                slctdYrExpression = slctdYrExpression + ")";
+                slctdYrExpression = slctdYrExpression + "')";
 
                 // -------------------------------------------
                 // regional "way"
@@ -217,7 +217,7 @@ namespace BExIS.Modules.Lui.UI.Models
 
                         // adapt the select expression to retrieve the means
                         // based on exploratory
-                        slctdExploExpression = " AND (Exploratory = '" + explo + "')";
+                        slctdExploExpression = " AND Exploratory = '" + explo + "'";
 
                         // calculate the regional means for all selected years and 
                         // for the current (meaning the current loop) exploratory
@@ -276,6 +276,7 @@ namespace BExIS.Modules.Lui.UI.Models
                     plotList.Clear();
 
                     // adapt the select expression to retrieve the means
+                    // based on exploratory
                     // based on exploratory
                     slctdExploExpression = "AND (Exploratory = '" + selectedExploList[0].ToString() + "'";
                     exploConcat = selectedExploList[0].ToString();
