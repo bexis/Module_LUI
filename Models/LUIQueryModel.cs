@@ -31,8 +31,8 @@ namespace BExIS.Modules.Lui.UI.Models
             ComponentsSet = new RadioButtonControlHelper();
 
             //fill ComponentsSet
-            ComponentsSet.SelectedValue = "NewSet";
-            ComponentsSet.Values = new List<string>() { "OldSet", "NewSet" };
+            ComponentsSet.SelectedValue = "new components set";
+            ComponentsSet.Values = new List<string>() { "old components set", "new components set" };
 
 
             // fill RawVsCalc
