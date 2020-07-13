@@ -84,7 +84,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             Session["DataStructureId"] = null;
 
-            if (model.ComponentsSet.SelectedValue == "OldSet")
+            if (model.ComponentsSet.SelectedValue == "old components set")
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
             else
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
@@ -194,9 +194,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         public ActionResult DownloadPDF(string fileName)
         {
-            string path = "LUI\\";
+            string path = "HelpFiles\\";
 
-            var filePath = Path.Combine(AppConfiguration.DataPath, path, fileName);
+            var filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), path, fileName);
             Response.AddHeader("Content-Disposition", "inline; filename=" + fileName);
             return File(filePath, MimeMapping.GetMimeMapping(fileName));
         }
