@@ -4,13 +4,13 @@ A tool to calculate the index of land-use intensity (LUI) according to Blüthgen
 
 # Settings
 
-datasetOldComponentsSet = dataset id from dataset "Input Data for LUI Calculation Tool of all grassland plots since 2006"	(ID 19266)  
-datastructureOldComponentsSet = BEXIS2 data structure id from dataset 19266  
-versionIdOldComponentsSet = highest version id from dataset version. You get this id wit this SQL `select * from datasetversions where datasetref = 19266` 
+*datasetOldComponentsSet* = dataset id from dataset "Input Data for LUI Calculation Tool of all grassland plots since 2006"	(ID 19266)  
+*datastructureOldComponentsSet* = BEXIS2 data structure id from dataset 19266  
+*versionIdOldComponentsSet* = highest version id from dataset version. You get this id wit this SQL `select * from datasetversions where datasetref = 19266` 
 
-datasetNewComponentsSet = dataset id from dataset "Input Data for LUI Calculation Tool of all grassland plots since 2006 - revised 2019	"	(ID 25086)  
-datastructureNewComponentsSet = BEXIS2 data structure id from dataset 25086  
-versionIdNewComponentsSet = highest version id from dataset version. You get this id wit this SQL `select * from datasetversions where datasetref = 25086` 
+*datasetNewComponentsSet* = dataset id from dataset "Input Data for LUI Calculation Tool of all grassland plots since 2006 - revised 2019	"	(ID 25086)  
+*datastructureNewComponentsSet* = BEXIS2 data structure id from dataset 25086  
+*versionIdNewComponentsSet* = highest version id from dataset version. You get this id wit this SQL `select * from datasetversions where datasetref = 25086` 
 
 
 
