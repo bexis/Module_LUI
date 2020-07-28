@@ -15,10 +15,9 @@
         {
         <td style="width: 600px; vertical-align:top;">
 
-            @Html.ActionLink("How To", "DownloadPDF", new { fileName = "HowToLUI.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @Html.ActionLink("Work Flow", "DownloadPDF", new { fileName = "WorkFlowLUI.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @Html.ActionLink("Info about new components set", "DownloadPDF", new { fileName = "NewCalcInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @Html.ActionLink("Documentation about changes", "DownloadPDF", new { fileName = "ChangesDocu.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            @Html.ActionLink("How to reference", "DownloadPDF", new { fileName = "LUI-citation.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            @Html.ActionLink("How to use the tool", "DownloadPDF", new { fileName = "HowToPlusDiagram.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
 
             <div id="divQuery00" class="dtm-divBox">
                 <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
