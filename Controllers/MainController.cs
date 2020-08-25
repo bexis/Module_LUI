@@ -211,50 +211,52 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private bool checkPreconditions()
         {
             // check for LUI new dataset
-            DatasetManager dm = new DatasetManager();
-            int luiIdNew = (int)Models.Settings.get("lui:datasetNewComponentsSet");
-            bool exists = dm.DatasetRepo.Query()
-                                        .Where(x => x.Id == luiIdNew )
+            using (DatasetManager dm = new DatasetManager())
+            using (DataStructureManager dsm = new DataStructureManager())
+            {
+                int luiIdNew = (int)Models.Settings.get("lui:datasetNewComponentsSet");
+                bool exists = dm.DatasetRepo.Query()
+                                            .Where(x => x.Id == luiIdNew)
+                                            .Any();
+                if (!exists)
+                {
+                    return false;
+                }
+
+                // check for export data structure
+                int dsdId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
+                exists = dsm.StructuredDataStructureRepo.Query()
+                                        .Where(x => x.Id == dsdId)
                                         .Any();
-            if (!exists)
-            {
-                return false;
-            }
+                if (!exists)
+                {
+                    return false;
+                }
 
-            // check for export data structure
-            DataStructureManager dsm = new DataStructureManager();
-            int dsdId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
-            exists = dsm.StructuredDataStructureRepo.Query()
-                                    .Where(x => x.Id == dsdId)
-                                    .Any();
-            if(!exists)
-            {
-                return false;
-            }
+                // check for LUI old dataset
+                int luiIdOld = (int)Models.Settings.get("lui:datasetOldComponentsSet");
+                exists = dm.DatasetRepo.Query()
+                                            .Where(x => x.Id == luiIdOld)
+                                            .Any();
+                if (!exists)
+                {
+                    return false;
+                }
 
-            // check for LUI old dataset
-            int luiIdOld = (int)Models.Settings.get("lui:datasetOldComponentsSet");
-            exists = dm.DatasetRepo.Query()
-                                        .Where(x => x.Id == luiIdOld)
+                // check for export data structure
+
+                int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
+                exists = dsm.StructuredDataStructureRepo.Query()
+                                        .Where(x => x.Id == dsdIdOld)
                                         .Any();
-            if (!exists)
-            {
-                return false;
-            }
+                if (!exists)
+                {
+                    return false;
+                }
 
-            // check for export data structure
-      
-            int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
-            exists = dsm.StructuredDataStructureRepo.Query()
-                                    .Where(x => x.Id == dsdIdOld)
-                                    .Any();
-            if (!exists)
-            {
-                return false;
+                // if we came that far, all conditions are met
+                return true;
             }
-
-            // if we came that far, all conditions are met
-            return true;
         }
     }
 }

@@ -364,23 +364,25 @@ namespace BExIS.Modules.Lui.UI.Models
             }
 
             // get dataset
-            Dlm.Services.Data.DatasetManager dsm = new Dlm.Services.Data.DatasetManager();
-            Dlm.Entities.Data.DatasetVersion dsv = dsm.GetDatasetLatestVersion(dsId);
-
-            // convert
-            //DataTable dt = OutputDataManager.ConvertPrimaryDataToDatatable(dsm, dsv, "LUI input data", true ); => not woking anymore
-
-            DatasetConvertor datasetConvertor = new DatasetConvertor();
-            DataTable dt = datasetConvertor.ConvertDatasetVersion(dsm, dsv, "LUI input data");
-
-            // set column shortcuts
-            foreach (DataColumn col in dt.Columns)
+            using (Dlm.Services.Data.DatasetManager dsm = new Dlm.Services.Data.DatasetManager())
             {
-             
-                col.ColumnName = col.Caption;
-            }
+                Dlm.Entities.Data.DatasetVersion dsv = dsm.GetDatasetLatestVersion(dsId);
 
-            return dt;
+                // convert
+                //DataTable dt = OutputDataManager.ConvertPrimaryDataToDatatable(dsm, dsv, "LUI input data", true ); => not woking anymore
+
+                DatasetConvertor datasetConvertor = new DatasetConvertor();
+                DataTable dt = datasetConvertor.ConvertDatasetVersion(dsm, dsv, "LUI input data");
+
+                // set column shortcuts
+                foreach (DataColumn col in dt.Columns)
+                {
+
+                    col.ColumnName = col.Caption;
+                }
+
+                return dt;
+            }
         }
 
 
