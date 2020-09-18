@@ -200,10 +200,10 @@ namespace BExIS.Modules.Lui.UI.Models
                 yearsConcat = selectedYearList[0];
                 for (int i = 1; i < selectedYearList.Count; i++)
                 {
-                    slctdYrExpression = slctdYrExpression + " OR Year = '" + DateTime.ParseExact(selectedYearList[i], "yyyy", CultureInfo.InvariantCulture);
+                    slctdYrExpression = slctdYrExpression + " OR Year = '" + DateTime.ParseExact(selectedYearList[i], "yyyy", CultureInfo.InvariantCulture) + "'";
                     yearsConcat = yearsConcat + ", " + selectedYearList[i];
                 }
-                slctdYrExpression = slctdYrExpression + "')";
+                slctdYrExpression = slctdYrExpression + ")";
 
                 // -------------------------------------------
                 // regional "way"
