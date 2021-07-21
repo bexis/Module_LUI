@@ -15,6 +15,8 @@ using Vaiona.Web.Mvc.Modularity;
 using Vaiona.Utils.Cfg;
 using System.Web;
 using BExIS.Modules.Lui.UI.Helper;
+using BExIS.Security.Services.Utilities;
+using BExIS.Security.Services.Subjects;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -77,6 +79,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         [HttpPost]
         public ActionResult CalculateLUI(LUIQueryModel model)
         {
+            Session["LUICalModel"] = null;
             // set page title
             ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
@@ -100,6 +103,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 ((Dictionary<string, string>)Session[SESSION_FILE]).Clear();
             }
+            Session["LUICalModel"] = model;
 
             return PartialView("_results", results);
         }
@@ -128,9 +132,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // filename
             // use unix timestamp to make filenames unique
             string filename = Models.Settings.get("lui:filename:download") as string;
-            // https://stackoverflow.com/a/17632585/1169798
-            Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-            filename += "_" + unixTimestamp;
+            LUIQueryModel model  = (LUIQueryModel)Session["LUICalModel"];
+            string mean = "";
+            if (model.TypeOfMean.SelectedValue != "empty")
+                mean = "_" + model.TypeOfMean.SelectedValue;
+            filename += "_" + model.ComponentsSet.SelectedValue + "_" + model.Scales.SelectedValue + mean + "_" + DateTime.Now.ToString("yyyy-MM-dd");
 
             // datastructure ID
             //int dsId = (int)Settings.get("lui:datastructure");
@@ -187,6 +193,30 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // get file path
             string path = ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType];
+
+            //send mail
+            
+            var es = new EmailService();
+            string user;
+            using (UserManager userManager = new UserManager())
+            {
+               user =  userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
+            }
+            LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
+            long datasetId;
+            if(model.ComponentsSet.SelectedValue.Contains("old"))
+                datasetId = Convert.ToInt64(Models.Settings.get("lui:datasetOldComponentsSet"));
+            else
+                datasetId = Convert.ToInt64(Models.Settings.get("lui:datasetNewComponentsSet"));
+            int version;
+            using (DatasetManager datasetManager = new DatasetManager())
+            {
+                version = datasetManager.GetDataset(datasetId).VersionNo;        
+            }
+
+            string text = "LUI Calculation file <b>\"" + Path.GetFileName(path) + "\"</b> with id <b>("+ datasetId + ")</b> version <b>("+ version + ")</b> was downloaded by <b>" + user + "</b>";
+            es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: "+ version +")" , text, "bexis-sys@listserv.uni-jena.de");
+
 
             // return file for download
             return File(path, mimeType, Path.GetFileName(path));
