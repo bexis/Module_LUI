@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿n="1.0" encoding="utf-8" ?>
 <settings>
   <entry key="key1" value="value1" type="String"/>
   <entry key="key2" value="value2" type="String"/>
@@ -6,21 +6,18 @@
 
   <!-- LUI settings -->
   <entry key="lui:datasetOldComponentsSet" value="19266" type="int"/>
-  <entry key="lui:datastructureOldComponentsSet" value="2" type="int"/>
-  <entry key="lui:versionIdOldComponentsSet" value="5" type="int"/>
+  <entry key="lui:datastructureOldComponentsSet" value="663" type="int"/>
+  <entry key="lui:versionIdOldComponentsSet" value="3554" type="int"/>
 
   <entry key="lui:datasetNewComponentsSet" value="25086" type="int"/>
-  <entry key="lui:datastructureNewComponentsSet" value="3" type="int"/>
-  <entry key="lui:versionIdNewComponentsSet" value="8" type="int"/>
+  <entry key="lui:datastructureNewComponentsSet" value="1056" type="int"/>
+  <entry key="lui:versionIdNewComponentsSet" value="7263" type="int"/>
 
   <entry key="lui:years:min" value="2006" type="int" />
-  <entry key="lui:years:max" value="2018" type="int" />
-  <entry key="lui:filename:download" value="results" type="string" />
+  <entry key="lui:years:max" value="2020" type="int" />
+  <entry key="lui:filename:download" value="LUI" type="string" />
   <entry key="lui:filename:namespace" value="LUI" type="string" />
 
   <entry key="lui:msg:alb" type="string" value="" />
   <entry key="lui:msg:hai" type="string" value="" />
   <entry key="lui:msg:sch" type="string" value="" />
-
-
-</settings>
