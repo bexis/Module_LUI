@@ -7,11 +7,9 @@
   <!-- LUI settings -->
   <entry key="lui:datasetOldComponentsSet" value="19266" type="int"/>
   <entry key="lui:datastructureOldComponentsSet" value="663" type="int"/>
-  <entry key="lui:versionIdOldComponentsSet" value="3554" type="int"/>
 
   <entry key="lui:datasetNewComponentsSet" value="25086" type="int"/>
   <entry key="lui:datastructureNewComponentsSet" value="1056" type="int"/>
-  <entry key="lui:versionIdNewComponentsSet" value="7263" type="int"/>
 
   <entry key="lui:years:min" value="2006" type="int" />
   <entry key="lui:years:max" value="2020" type="int" />

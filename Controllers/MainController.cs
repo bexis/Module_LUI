@@ -59,10 +59,14 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
         }
 
-        public ActionResult ShowPrimaryData(long datasetID, int versionId)
-
+        public ActionResult ShowPrimaryData(long datasetID)
         {
-            var view = this.Render("DDM", "Data", "ShowPrimaryData", new RouteValueDictionary()
+            long versionId = 0;
+            using (var datasetManager = new DatasetManager())
+            {
+                versionId = datasetManager.GetDatasetLatestVersion(datasetID).Id;
+            }
+                var view = this.Render("DDM", "Data", "ShowPrimaryData", new RouteValueDictionary()
             {
                 { "datasetID", datasetID },
                 { "versionId", versionId }
