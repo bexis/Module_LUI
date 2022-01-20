@@ -68,6 +68,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http.Formatting">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
@@ -180,9 +181,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\MainController.cs" />
+    <Compile Include="Controllers\LUICalculationController.cs" />
+    <Compile Include="Controllers\LUIComponentCalculationController.cs" />
     <Compile Include="Helper\CalculateLui.cs" />
     <Compile Include="Helper\DownloadManager.cs" />
+    <Compile Include="Helper\LUIComponentsCalculation.cs" />
     <Compile Include="Helper\LUISeedDataGenerator.cs" />
     <Compile Include="Helper\Settings.cs" />
     <Compile Include="LUIModule.cs" />
@@ -199,9 +202,9 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
-    <Content Include="Views\Main\Index.cshtml" />
-    <Content Include="Views\Main\_results.cshtml" />
-    <Content Include="Views\Main\Error.cshtml" />
+    <Content Include="Views\LUICalculation\Index.cshtml" />
+    <Content Include="Views\LUICalculation\_results.cshtml" />
+    <Content Include="Views\LUICalculation\Error.cshtml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
@@ -212,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="fonts\" />
+    <Folder Include="Views\LUIComponentCalculation\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">

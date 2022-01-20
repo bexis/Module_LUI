@@ -14,12 +14,12 @@
 
     <Export tag="menubar" id="dataTools" order="4"
            title="Tools" description="data tool desc" icon=""
-           controller="main" action="index"
+           controller="LUICalculation" action="index"
            extends="./menubarRoot" />
 	
     <Export tag="menubar" id="luiMenu" order="1"
             title="LUI Calculation" description="LUI desc" icon=""
-            controller="main" action="index"
+            controller="LUICalculation" action="index"
             extends="./menubarRoot/dataTools" />
     
 	<!-- Settings Example-->

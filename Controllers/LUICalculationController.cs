@@ -20,7 +20,7 @@ using BExIS.Security.Services.Subjects;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
-    public class MainController : Controller
+    public class LUICalculationController : Controller
     {
         #region constants
         // page title
