@@ -18,7 +18,25 @@
             @Html.ActionLink("How to reference", "DownloadPDF", new { fileName = "LUI-citation.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             @Html.ActionLink("How to use the tool", "DownloadPDF", new { fileName = "HowToPlusDiagram.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+            <div class="dtm-divBox">
+                <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
+            @foreach(var missingCompData in Model.MissingComponentData)
+            {
+               <ul>
+                   <li>
+                       Year: @missingCompData.Year
+                        Plots:
+                       <ul>
+                        @foreach (var plot in missingCompData.PlotIds)
+                        {
+                           <li>@plot</li>
+                        }
+                      </ul>
+                   </li>
+               </ul>
+            }
 
+            </div>
             <div id="divQuery00" class="dtm-divBox">
                 <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
                 <div class="dtm-controls">

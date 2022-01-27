@@ -18,6 +18,8 @@ namespace BExIS.Modules.Lui.UI.Models
 
         public RadioButtonControlHelper ComponentsSet { get; set; }
 
+        public List<MissingComponentData> MissingComponentData { get; set; }
+
 
         public LUIQueryModel()
         {
@@ -29,6 +31,8 @@ namespace BExIS.Modules.Lui.UI.Models
             TypeOfMean = new RadioButtonControlHelper();
             Plotlevel = new RadioButtonControlHelper();
             ComponentsSet = new RadioButtonControlHelper();
+
+            MissingComponentData = new List<MissingComponentData>();
 
             //fill ComponentsSet
             ComponentsSet.SelectedValue = "new components set";
@@ -49,7 +53,7 @@ namespace BExIS.Modules.Lui.UI.Models
             Explos.Add(new CheckboxControlHelper { Name = "SCH", Checked = false });
 
             // fill Years          
-            int fromYear = (int)Settings.get( "lui:years:min" );
+            int fromYear = (int)Settings.get("lui:years:min");
             int toYear = (int)Settings.get("lui:years:max");
             for (int i = fromYear; i <= toYear; i++)
             {
@@ -78,7 +82,21 @@ namespace BExIS.Modules.Lui.UI.Models
         public string SelectedValue { get; set; }
         public List<string> Values { get; set; }
     }
-    
+
+    public class MissingComponentData
+    {
+        public int Year { get; set; }
+        public List<string> PlotIds { get; set; }
+
+        public MissingComponentData()
+        {
+            PlotIds = new List<string>();
+        }
+
+    }
+
+
+
 
 
 

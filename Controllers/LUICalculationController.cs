@@ -17,6 +17,7 @@ using System.Web;
 using BExIS.Modules.Lui.UI.Helper;
 using BExIS.Security.Services.Utilities;
 using BExIS.Security.Services.Subjects;
+using System.Net;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -48,6 +49,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
                 // show the view
                 LUIQueryModel model = new LUIQueryModel();
+                model.MissingComponentData = GetMissingComponentData();
+
                 return View("Index", model);
 
             } else
@@ -291,6 +294,73 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 // if we came that far, all conditions are met
                 return true;
             }
+        }
+
+
+        /// <summary>
+        /// get missing comp data
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private List<MissingComponentData> GetMissingComponentData()
+        {
+            List<MissingComponentData> data = new List<MissingComponentData>();
+            string serverName = "";
+            string datasetId = "";
+            string token = "";
+
+            string link = serverName + "/api/data/" + datasetId;
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            request.Headers.Add("Authorization", "Bearer " + token);
+
+            DataTable compData = new DataTable();
+            compData.Columns.Add("Year");
+            compData.Columns.Add("EP_PlotID");
+
+            try
+            {
+                // Get response  
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    // Get the response stream  
+                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        string line = String.Empty;
+                        string sep = "\t";
+                        String[] row = new String[4];
+                        int count = 0;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            count++;
+                            if (count > 1)
+                            {
+                                row = line.Split(',');
+                                DataRow dr = compData.NewRow();
+                                dr["Year"] = row[0];
+                                dr["EP_PlotID"] = row[2];
+                            }
+                        }
+                        response.Close();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            //get all years where data rows less then 50, that means not all plots has data
+            var years = compData.AsEnumerable().GroupBy(x=>x.Field<string>("Year")).Where(g => g.Count() < 50);
+            foreach(var i in years)
+            {
+                MissingComponentData missingComponentData = new MissingComponentData();
+                missingComponentData.Year = i.Select(a => a.Field<int>("Year")).FirstOrDefault();
+                missingComponentData.PlotIds = compData.AsEnumerable().Where(x => x.Field<int>("Year") == missingComponentData.Year).Select(a => a.Field<string>("EP_PlotID")).ToList();
+                data.Add(missingComponentData);
+            }
+
+            return data;
+
         }
     }
 }
