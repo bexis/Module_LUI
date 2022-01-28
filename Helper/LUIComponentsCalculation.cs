@@ -2,8 +2,6 @@
 using System.Data;
 using System.Linq;
 
-
-
 namespace BExIS.Modules.Lui.UI.Helper
 {
     public class LUIComponentsCalculation
@@ -89,13 +87,20 @@ namespace BExIS.Modules.Lui.UI.Helper
                 //else
                 //    NorgManure = "NA";
 
+                double NorgBiogas = row.Field<double>("Biogas_m3ha") * 4.4;
+
+                //Correct manure N for lagged release
+
+                int Year = row.Field<int>("Year");
+
+
                 //Calculate total organic N or take direct measurements from the data table
 
                 double Norg;
                 if (row.Field<string>("ExactValOrg") == "ja")
                     Norg = row.Field<double>("NorgExact");
-                else
-                    //Norg = 
+                //else
+               //Norg = 
 
                     //Calculate TotalFertilization
 
