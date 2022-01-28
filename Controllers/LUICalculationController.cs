@@ -18,6 +18,7 @@ using BExIS.Modules.Lui.UI.Helper;
 using BExIS.Security.Services.Utilities;
 using BExIS.Security.Services.Subjects;
 using System.Net;
+using System.Web.Script.Serialization;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -41,7 +42,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         // GET: Main
         public ActionResult Index()
         {
-            if( checkPreconditions() )
+            if (checkPreconditions())
             {
 
                 // set page title
@@ -50,7 +51,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 // show the view
                 LUIQueryModel model = new LUIQueryModel();
                 model.MissingComponentData = GetMissingComponentData();
-
+                model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                model.NewComponentsSetDatasetVersion = GetDatasetInfo(model.NewComponentsSetDatasetId).Version;
                 return View("Index", model);
 
             } else
@@ -69,7 +71,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 versionId = datasetManager.GetDatasetLatestVersion(datasetID).Id;
             }
-                var view = this.Render("DDM", "Data", "ShowPrimaryData", new RouteValueDictionary()
+            var view = this.Render("DDM", "Data", "ShowPrimaryData", new RouteValueDictionary()
             {
                 { "datasetID", datasetID },
                 { "versionId", versionId }
@@ -115,7 +117,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             return PartialView("_results", results);
         }
 
-        
+
         /// <summary>
         /// prepare the serialized data file for download
         /// </summary>
@@ -139,7 +141,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // filename
             // use unix timestamp to make filenames unique
             string filename = Models.Settings.get("lui:filename:download") as string;
-            LUIQueryModel model  = (LUIQueryModel)Session["LUICalModel"];
+            LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
             string mean = "";
             if (model.TypeOfMean.SelectedValue != "empty")
                 mean = "_" + model.TypeOfMean.SelectedValue;
@@ -202,27 +204,27 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string path = ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType];
 
             //send mail
-            
+
             var es = new EmailService();
             string user;
             using (UserManager userManager = new UserManager())
             {
-               user =  userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
+                user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
             }
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
             long datasetId;
-            if(model.ComponentsSet.SelectedValue.Contains("old"))
+            if (model.ComponentsSet.SelectedValue.Contains("old"))
                 datasetId = Convert.ToInt64(Models.Settings.get("lui:datasetOldComponentsSet"));
             else
                 datasetId = Convert.ToInt64(Models.Settings.get("lui:datasetNewComponentsSet"));
             int version;
             using (DatasetManager datasetManager = new DatasetManager())
             {
-                version = datasetManager.GetDataset(datasetId).VersionNo;        
+                version = datasetManager.GetDataset(datasetId).VersionNo;
             }
 
-            string text = "LUI Calculation file <b>\"" + Path.GetFileName(path) + "\"</b> with id <b>("+ datasetId + ")</b> version <b>("+ version + ")</b> was downloaded by <b>" + user + "</b>";
-            es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: "+ version +")" , text, "bexis-sys@listserv.uni-jena.de");
+            string text = "LUI Calculation file <b>\"" + Path.GetFileName(path) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was downloaded by <b>" + user + "</b>";
+            es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
 
 
             // return file for download
@@ -298,20 +300,19 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
 
         /// <summary>
-        /// get missing comp data
+        /// Get missing comp data
         /// 
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of missing component data. Years with missing ep plotids.</returns>
         private List<MissingComponentData> GetMissingComponentData()
         {
             List<MissingComponentData> data = new List<MissingComponentData>();
-            string serverName = "";
-            string datasetId = "";
-            string token = "";
+            DataAccess dataAccess = DataAccessHelper.ReadFile();
+            string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
 
-            string link = serverName + "/api/data/" + datasetId;
+            string link = dataAccess.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + token);
+            request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
 
             DataTable compData = new DataTable();
             compData.Columns.Add("Year");
@@ -336,8 +337,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
                             {
                                 row = line.Split(',');
                                 DataRow dr = compData.NewRow();
-                                dr["Year"] = row[0];
+                                dr["Year"] = DateTime.Parse(row[0]).ToString("yyyy");
                                 dr["EP_PlotID"] = row[2];
+                                compData.Rows.Add(dr);
                             }
                         }
                         response.Close();
@@ -350,17 +352,114 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
 
             //get all years where data rows less then 50, that means not all plots has data
-            var years = compData.AsEnumerable().GroupBy(x=>x.Field<string>("Year")).Where(g => g.Count() < 50);
-            foreach(var i in years)
+            var years = compData.AsEnumerable().GroupBy(x => x.Field<string>("Year")).Where(g => g.Count() < 50).ToList();
+
+            foreach (var i in years)
             {
                 MissingComponentData missingComponentData = new MissingComponentData();
-                missingComponentData.Year = i.Select(a => a.Field<int>("Year")).FirstOrDefault();
-                missingComponentData.PlotIds = compData.AsEnumerable().Where(x => x.Field<int>("Year") == missingComponentData.Year).Select(a => a.Field<string>("EP_PlotID")).ToList();
+                missingComponentData.Year = i.Select(a => a.Field<string>("Year")).FirstOrDefault();
+                List<string> availablePlots = compData.AsEnumerable().Where(x => x.Field<string>("Year") == missingComponentData.Year).Select(a => a.Field<string>("EP_PlotID")).ToList();
+                missingComponentData.PlotIds = getAllGrasslandPlots().Except(availablePlots).ToList();
                 data.Add(missingComponentData);
             }
 
             return data;
 
         }
+
+        private DatasetObject GetDatasetInfo(string datasetId)
+        {
+            DataAccess dataAccess = DataAccessHelper.ReadFile();
+            string link = dataAccess.ServerName + "/api/data/" + datasetId;
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
+
+            DatasetObject myojb = new DatasetObject();
+
+            try
+            {
+                // Get response  
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        JavaScriptSerializer js = new JavaScriptSerializer();
+                        var objText = reader.ReadToEnd();
+                        myojb = (DatasetObject)js.Deserialize(objText, typeof(DatasetObject));
+
+
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+
+            return myojb;
+
+        }
+
+        /// <summary>
+        /// get all ep plot ids from grasland plots
+        /// 
+        /// </summary>
+        /// <returns>list of grasland ep plot ids</returns>
+        private List<string> getAllGrasslandPlots()
+        {
+            DataAccess dataAccess = DataAccessHelper.ReadFile();
+            string datasetId = Models.Settings.get("lui:epPlotsDataset").ToString();
+
+            string link = dataAccess.ServerName + "/api/data/" + datasetId;
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            //request.PreAuthenticate = true;
+            request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
+
+            DataTable epPlotTable = new DataTable();
+            epPlotTable.Columns.Add("EP_Plotid");
+            epPlotTable.Columns.Add("LANDUSE");
+
+            try
+            {
+                // Get response  
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    // Get the response stream  
+                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        string line = String.Empty;
+                        string sep = "\t";
+                        String[] row = new String[4];
+                        int count = 0;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            count++;
+                            if (count > 1)
+                            {
+                                row = line.Split(',');
+                                DataRow dr = epPlotTable.NewRow();
+                                dr["EP_Plotid"] = row[0];
+                                dr["LANDUSE"] = row[3];
+                                epPlotTable.Rows.Add(dr);
+                            }
+                        }
+
+                        response.Close();
+                    }
+                }
+            }
+
+            catch (Exception e)
+            {
+
+            }
+
+            //get all grasland plots
+            List<string> graslandPlots = epPlotTable.AsEnumerable().Where((x => x.Field<string>("LANDUSE") == "G")).Select(a => a.Field<string>("EP_PlotID")).ToList();
+
+            return graslandPlots;
+        }
+        }
+
+      
     }
-}

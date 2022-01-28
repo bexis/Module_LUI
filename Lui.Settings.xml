@@ -20,5 +20,6 @@
   <entry key="lui:msg:hai" type="string" value="" />
   <entry key="lui:msg:sch" type="string" value="" />
 
+  <entry key="lui:epPlotsDataset" value="20826" type="int"/>
 
 </settings>

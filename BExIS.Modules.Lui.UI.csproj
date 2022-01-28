@@ -73,6 +73,7 @@
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Http">
       <HintPath>..\..\..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
@@ -184,6 +185,7 @@
     <Compile Include="Controllers\LUICalculationController.cs" />
     <Compile Include="Controllers\LUIComponentCalculationController.cs" />
     <Compile Include="Helper\CalculateLui.cs" />
+    <Compile Include="Helper\DataAccessHelper.cs" />
     <Compile Include="Helper\DownloadManager.cs" />
     <Compile Include="Helper\LUIComponentsCalculation.cs" />
     <Compile Include="Helper\LUISeedDataGenerator.cs" />
