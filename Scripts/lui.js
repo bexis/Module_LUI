@@ -1,6 +1,8 @@
-﻿!function () {
+﻿
 
-    
+!function () {
+
+
 
     /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Setup XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
@@ -335,5 +337,7 @@
     function resetQuery4() {
         $('#divQuery4 input').prop('checked', false);
     }
+
+
 
 }();

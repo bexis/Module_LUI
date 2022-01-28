@@ -20,6 +20,9 @@ namespace BExIS.Modules.Lui.UI.Models
 
         public List<MissingComponentData> MissingComponentData { get; set; }
 
+        public string NewComponentsSetDatasetId { get; set; }
+
+        public string NewComponentsSetDatasetVersion { get; set; }
 
         public LUIQueryModel()
         {
@@ -85,7 +88,8 @@ namespace BExIS.Modules.Lui.UI.Models
 
     public class MissingComponentData
     {
-        public int Year { get; set; }
+        public string Year { get; set; }
+
         public List<string> PlotIds { get; set; }
 
         public MissingComponentData()

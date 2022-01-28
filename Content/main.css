@@ -52,3 +52,15 @@ label.bx-disabled {
     opacity: 0.6;
     pointer-events: none; /* workaround for checkboxes being disabled, but still send to model */
 }
+
+.box {
+    float: left;
+    width: 50%;
+}
+
+.plots {
+    float: left;
+    height:150px;
+    overflow: auto;
+}
+  
