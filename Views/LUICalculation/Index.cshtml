@@ -20,156 +20,166 @@
             @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             <div class="dtm-divBox">
                 <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
-            @foreach(var missingCompData in Model.MissingComponentData)
-            {
-               <ul>
-                   <li>
-                       Year: @missingCompData.Year
-                        Plots:
-                       <ul>
-                        @foreach (var plot in missingCompData.PlotIds)
+                <div class="dtm-controls">
+                    @if (Model.MissingComponentData.Count() == 0)
+                    {
+                        <div>No warnings.</div>
+                    }
+                    else
+                    {
+                        foreach (var missingCompData in Model.MissingComponentData)
                         {
-                           <li>@plot</li>
+
+                            <div class="box">Year: @missingCompData.Year 
+                                from dataset @Model.NewComponentsSetDatasetId version: @Model.NewComponentsSetDatasetVersion</div>
+                            <div class="box">
+                                Missing plots - <a class="plotClick">Show</a>
+                            </div>
+                            <div class="plots">
+                                @foreach (var plot in missingCompData.PlotIds)
+                                {
+                                    @plot<br />
+                                }
+                            </div>
+
                         }
-                      </ul>
-                   </li>
-               </ul>
-            }
-
-            </div>
-            <div id="divQuery00" class="dtm-divBox">
-                <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
-                <div class="dtm-controls">
-                    @foreach (var item in Model.ComponentsSet.Values)
-                    {
-                        <span>
-                            <label>
-                                @Html.RadioButtonFor(m => m.ComponentsSet.SelectedValue, item)
-                                @item
-                            </label>
-                        </span>
                     }
-                </div>
-            </div>
-
-            <div id="divQuery0" class="dtm-divBox"
-                 data-datasetidOld="@Settings.get("lui:datasetOldComponentsSet")"
-                 data-datasetidNew="@Settings.get("lui:datasetNewComponentsSet")"
-                 data-showdataurl="@Url.Action("ShowPrimaryData", "Main", new { Area = "LUI" })">
-                <p class="dtm-para_green">Please select if you want to extract the raw data (unstandardized) OR if you want to calculate the LUI (standardized).</p>
-                <div class="dtm-controls">
-                    @foreach (var item in Model.RawVsCalc.Values)
-                    {
-                        <span>
-                            <label>
-                                @Html.RadioButtonFor(m => m.RawVsCalc.SelectedValue, item)
-                                @item
-                            </label>
-                        </span>
-                    }
-                </div>
-            </div>
-
-            <div id="divQuery1" style="display:none" class="dtm-divBox">
-                <p class="dtm-para_green">Please select if you want to calculate a regional OR a global LUI.</p>
-                <div class="dtm-controls">
-                    @foreach (var item in Model.Scales.Values)
-                    {
-                        <span>
-                            <label>
-                                @Html.RadioButtonFor(m => m.Scales.SelectedValue, item)
-                                @item
-                            </label>
-                        </span>
-                    }
-                </div>
-            </div>
-
-            <div id="divQuery2" style="display:none" class="dtm-divBox">
-                <p id="txt_explos" class="dtm-para_green">
-                    <span data-scale="global">Please select two or all Exploratories. Calculation will use an overall average of the choosen Exploratories.</span>
-                    <span data-scale="regional">Please select one or more Exploratory(ies). Calculation will use an Exploratory-wise average.</span>
-                </p>
-                <button type="button" data-selectall-target="#divQuery2_1" class="dtm-selectall bx-button smaller function">
-                    <span class="dtm-selectall">Select all</span>
-                    <span>Deselect all</span>
-                </button>
-                <span class="dtm-error" id="errExploReg">Please select at least one Exploratory.</span>
-                <span class="dtm-error" id="errExploGlob">Global: Please select at least two Exploratories.</span>
+                    </div>
                 <br />
-
-                <div id="divQuery2_1" class="dtm-controls">
-                    @for (int i = 0; i < Model.Explos.Count(); i++)
-                    {
-                        <span>
-                            <label>
-                                @Html.CheckBoxFor(m => m.Explos[i].Checked, new { @class = "cb_explos", @data_location = Model.Explos[i].Name })
-                                @Html.DisplayFor(m => m.Explos[i].Name)
-                                @Html.HiddenFor(m => m.Explos[i].Name)
-                            </label>
-                        </span>
-                    }
+                </div>
+                <div id="divQuery00" class="dtm-divBox">
+                    <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
+                    <div class="dtm-controls">
+                        @foreach (var item in Model.ComponentsSet.Values)
+                        {
+                            <span>
+                                <label>
+                                    @Html.RadioButtonFor(m => m.ComponentsSet.SelectedValue, item)
+                                    @item
+                                </label>
+                            </span>
+                        }
+                    </div>
                 </div>
 
-                <p class="dtm-para_green">Please select one or more years you want to calculate the LUI for. Old set has only years up to 2016.</p>
-                <button type="button" data-selectall-target="#divQuery2_2" class="dtm-selectall bx-button smaller function">
-                    <span class="dtm-selectall">Select all</span>
-                    <span>Deselect all</span>
-                </button>
-
-                <span class="dtm-error" id="errYears">Please select at least one year.</span>
-                <br />
-
-                <div id="divQuery2_2" class="dtm-controls">
-                    @for (int i = 0; i < Model.Years.Count(); i++)
-                    {
-                        <span style="flex-grow: 0">
-                            <label>
-                                @Html.CheckBoxFor(m => m.Years[i].Checked, new { @class = "cb_years" })
-                                @Html.DisplayFor(m => m.Years[i].Name)
-                                @Html.HiddenFor(m => m.Years[i].Name)
-                            </label>
-                        </span>
-                    }
+                <div id="divQuery0" class="dtm-divBox"
+                     data-datasetidOld="@Settings.get("lui:datasetOldComponentsSet")"
+                     data-datasetidNew="@Settings.get("lui:datasetNewComponentsSet")"
+                     data-showdataurl="@Url.Action("ShowPrimaryData", "Main", new { Area = "LUI" })">
+                    <p class="dtm-para_green">Please select if you want to extract the raw data (unstandardized) OR if you want to calculate the LUI (standardized).</p>
+                    <div class="dtm-controls">
+                        @foreach (var item in Model.RawVsCalc.Values)
+                        {
+                            <span>
+                                <label>
+                                    @Html.RadioButtonFor(m => m.RawVsCalc.SelectedValue, item)
+                                    @item
+                                </label>
+                            </span>
+                        }
+                    </div>
                 </div>
 
-                <div class="dtm-message dtm-para_green" id="dtmLocationMessages"><div data-location="ALB">@Settings.get("lui:msg:alb")</div><div data-location="HAI">@Settings.get("lui:msg:hai")</div><div data-location="SCH">@Settings.get("lui:msg:sch")</div></div>
-
-                <button id="btnConfirmSelection" type="button" name="Confirm selection" class="bx-button small function">Confirm selection</button>
-                <button id="btnEditSelection" type="button" name="Edit selection" class="bx-button small function bx-disabled" disabled="disabled">Edit selection</button>
-            </div>
-
-            <div id="divQuery3" style="display:none" class="dtm-divBox">
-                <p class="dtm-para_green">Please select if you want to calculate a LUI for every selected year separately OR one LUI over all selected years.</p>
-                <div class="dtm-controls">
-                    @foreach (var item in Model.TypeOfMean.Values)
-                    {
-                        <span>
-                            <label>
-                                @Html.RadioButtonFor(m => m.TypeOfMean.SelectedValue, item)
-                                @item
-                            </label>
-                        </span>
-                    }
+                <div id="divQuery1" style="display:none" class="dtm-divBox">
+                    <p class="dtm-para_green">Please select if you want to calculate a regional OR a global LUI.</p>
+                    <div class="dtm-controls">
+                        @foreach (var item in Model.Scales.Values)
+                        {
+                            <span>
+                                <label>
+                                    @Html.RadioButtonFor(m => m.Scales.SelectedValue, item)
+                                    @item
+                                </label>
+                            </span>
+                        }
+                    </div>
                 </div>
-            </div>
 
-            <div id="divQuery4" style="display:none" class="dtm-divBox">
-                <p class="dtm-para_green">Please select for which Plots the LUI will be calculated. Please be aware that standardization is always done over all EPs, not just the selected ones. </p>
-                <div class="dtm-controls">
-                    @foreach (var item in Model.Plotlevel.Values)
-                    {
-                        <span>
-                            <label>
-                                @Html.RadioButtonFor(m => m.Plotlevel.SelectedValue, item)
-                                @item
-                            </label>
-                        </span>
-                    }
+                <div id="divQuery2" style="display:none" class="dtm-divBox">
+                    <p id="txt_explos" class="dtm-para_green">
+                        <span data-scale="global">Please select two or all Exploratories. Calculation will use an overall average of the choosen Exploratories.</span>
+                        <span data-scale="regional">Please select one or more Exploratory(ies). Calculation will use an Exploratory-wise average.</span>
+                    </p>
+                    <button type="button" data-selectall-target="#divQuery2_1" class="dtm-selectall bx-button smaller function">
+                        <span class="dtm-selectall">Select all</span>
+                        <span>Deselect all</span>
+                    </button>
+                    <span class="dtm-error" id="errExploReg">Please select at least one Exploratory.</span>
+                    <span class="dtm-error" id="errExploGlob">Global: Please select at least two Exploratories.</span>
+                    <br />
+
+                    <div id="divQuery2_1" class="dtm-controls">
+                        @for (int i = 0; i < Model.Explos.Count(); i++)
+                        {
+                            <span>
+                                <label>
+                                    @Html.CheckBoxFor(m => m.Explos[i].Checked, new { @class = "cb_explos", @data_location = Model.Explos[i].Name })
+                                    @Html.DisplayFor(m => m.Explos[i].Name)
+                                    @Html.HiddenFor(m => m.Explos[i].Name)
+                                </label>
+                            </span>
+                        }
+                    </div>
+
+                    <p class="dtm-para_green">Please select one or more years you want to calculate the LUI for. Old set has only years up to 2016.</p>
+                    <button type="button" data-selectall-target="#divQuery2_2" class="dtm-selectall bx-button smaller function">
+                        <span class="dtm-selectall">Select all</span>
+                        <span>Deselect all</span>
+                    </button>
+
+                    <span class="dtm-error" id="errYears">Please select at least one year.</span>
+                    <br />
+
+                    <div id="divQuery2_2" class="dtm-controls">
+                        @for (int i = 0; i < Model.Years.Count(); i++)
+                        {
+                            <span style="flex-grow: 0">
+                                <label>
+                                    @Html.CheckBoxFor(m => m.Years[i].Checked, new { @class = "cb_years" })
+                                    @Html.DisplayFor(m => m.Years[i].Name)
+                                    @Html.HiddenFor(m => m.Years[i].Name)
+                                </label>
+                            </span>
+                        }
+                    </div>
+
+                    <div class="dtm-message dtm-para_green" id="dtmLocationMessages"><div data-location="ALB">@Settings.get("lui:msg:alb")</div><div data-location="HAI">@Settings.get("lui:msg:hai")</div><div data-location="SCH">@Settings.get("lui:msg:sch")</div></div>
+
+                    <button id="btnConfirmSelection" type="button" name="Confirm selection" class="bx-button small function">Confirm selection</button>
+                    <button id="btnEditSelection" type="button" name="Edit selection" class="bx-button small function bx-disabled" disabled="disabled">Edit selection</button>
                 </div>
-            </div>
-            <button id="btnCalculateLUI" name="Calculate LUI" type="submit" class="bx-button action" style="display:none">Calculate LUI</button>
-        </td>
+
+                <div id="divQuery3" style="display:none" class="dtm-divBox">
+                    <p class="dtm-para_green">Please select if you want to calculate a LUI for every selected year separately OR one LUI over all selected years.</p>
+                    <div class="dtm-controls">
+                        @foreach (var item in Model.TypeOfMean.Values)
+                        {
+                            <span>
+                                <label>
+                                    @Html.RadioButtonFor(m => m.TypeOfMean.SelectedValue, item)
+                                    @item
+                                </label>
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div id="divQuery4" style="display:none" class="dtm-divBox">
+                    <p class="dtm-para_green">Please select for which Plots the LUI will be calculated. Please be aware that standardization is always done over all EPs, not just the selected ones. </p>
+                    <div class="dtm-controls">
+                        @foreach (var item in Model.Plotlevel.Values)
+                        {
+                            <span>
+                                <label>
+                                    @Html.RadioButtonFor(m => m.Plotlevel.SelectedValue, item)
+                                    @item
+                                </label>
+                            </span>
+                        }
+                    </div>
+                </div>
+                <button id="btnCalculateLUI" name="Calculate LUI" type="submit" class="bx-button action" style="display:none">Calculate LUI</button>
+</td>
         }
 
         <td style="vertical-align:top;">
@@ -187,4 +197,22 @@
     </tr>
 </table>
 
-<script type="text/javascript" src="/Areas/LUI/Scripts/lui.js"></script>
+<script type="text/javascript" src="/Areas/LUI/Scripts/lui.js">
+
+
+</script>
+<script>
+
+    /* waring list */
+    $(document).ready(function () {
+
+        $('.plots').hide();
+
+        $('.plotClick').click(function () {
+            $('.plots').slideToggle();
+        });
+
+    });
+
+
+</script>
