@@ -370,7 +370,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private DatasetObject GetDatasetInfo(string datasetId)
         {
             DataAccess dataAccess = DataAccessHelper.ReadFile();
-            string link = dataAccess.ServerName + "/api/data/" + datasetId;
+            string link = dataAccess.ServerName + "/api/dataset/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
 
@@ -391,9 +391,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
-
+                string error = "Not data" + e.InnerException;
             }
 
             return myojb;

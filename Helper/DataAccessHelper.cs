@@ -35,6 +35,18 @@ namespace BExIS.Modules.Lui.UI.Helper
         public string Description { get; set; }
         public string DataStructureId { get; set; }
         public string MetadataStructureId { get; set; }
-        public string AdditionalInformations { get; set; }
+        public AdditionalInformations AdditionalInformations { get; set; }
+        public DatasetObject()
+        {
+            AdditionalInformations = new AdditionalInformations();
+        }
     }
+   
+}
+
+
+public class AdditionalInformations
+{
+    public string Title { get; set; }
+
 }
