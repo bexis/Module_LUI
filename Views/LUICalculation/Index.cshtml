@@ -30,13 +30,21 @@
                         }
                         else
                         {
+                            <div class="box">
+                               Source Dataset: @Model.NewComponentsSetDatasetId<br />
+                            </div>
+                            <div class="box">
+                                Version: @Model.NewComponentsSetDatasetVersion
+                            </div>
+                            <div class="box">
+                               Last update: 
+                            </div>
+                            <br /><br />
                             foreach (var missingCompData in Model.MissingComponentData)
                             {
 
                                 <div class="box">
                                     Year: @missingCompData.Year<br />
-                                    Dataset @Model.NewComponentsSetDatasetId<br />
-                                    Version: @Model.NewComponentsSetDatasetVersion
                                 </div>
                                 <div class="box">
                                     Missing plots - <a class="plotClick">Show</a>
