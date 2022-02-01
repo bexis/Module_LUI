@@ -55,12 +55,13 @@ label.bx-disabled {
 
 .box {
     float: left;
-    width: 50%;
+    width: 40%;
 }
 
 .plots {
     float: left;
-    height:150px;
+    height: 150px;
     overflow: auto;
+    width: 20%;
 }
   

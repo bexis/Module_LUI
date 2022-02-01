@@ -18,35 +18,42 @@
             @Html.ActionLink("How to reference", "DownloadPDF", new { fileName = "LUI-citation.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             @Html.ActionLink("How to use the tool", "DownloadPDF", new { fileName = "HowToPlusDiagram.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            <div class="dtm-divBox">
-                <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
-                <div class="dtm-controls">
-                    @if (Model.MissingComponentData.Count() == 0)
-                    {
-                        <div>No warnings.</div>
-                    }
-                    else
-                    {
-                        foreach (var missingCompData in Model.MissingComponentData)
+            @if (Model.MissingComponentData.Count() != 0)
+            {
+                <div class="dtm-divBox">
+                    <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
+
+                    <div class="dtm-controls">
+                        @if (Model.MissingComponentData.Count() == 0)
                         {
-
-                            <div class="box">Year: @missingCompData.Year 
-                                from dataset @Model.NewComponentsSetDatasetId version: @Model.NewComponentsSetDatasetVersion</div>
-                            <div class="box">
-                                Missing plots - <a class="plotClick">Show</a>
-                            </div>
-                            <div class="plots">
-                                @foreach (var plot in missingCompData.PlotIds)
-                                {
-                                    @plot<br />
-                                }
-                            </div>
-
+                            <div>No warnings.</div>
                         }
-                    }
+                        else
+                        {
+                            foreach (var missingCompData in Model.MissingComponentData)
+                            {
+
+                                <div class="box">
+                                    Year: @missingCompData.Year
+                                    dataset @Model.NewComponentsSetDatasetId version: @Model.NewComponentsSetDatasetVersion
+                                </div>
+                                <div class="box">
+                                    Missing plots - <a class="plotClick">Show</a>
+                                </div>
+                                <div class="plots">
+                                    @foreach (var plot in missingCompData.PlotIds)
+                                    {
+                                        @plot<br />
+                                    }
+                                </div>
+
+                            }
+                        }
                     </div>
-                <br />
+                    
+                    <br />
                 </div>
+            }
                 <div id="divQuery00" class="dtm-divBox">
                     <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
                     <div class="dtm-controls">
@@ -179,7 +186,7 @@
                     </div>
                 </div>
                 <button id="btnCalculateLUI" name="Calculate LUI" type="submit" class="bx-button action" style="display:none">Calculate LUI</button>
-</td>
+            </td>
         }
 
         <td style="vertical-align:top;">
