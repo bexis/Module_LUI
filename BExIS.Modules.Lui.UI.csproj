@@ -201,7 +201,6 @@
     <Content Include="web.config" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\LUICalculation\Index.cshtml" />
-    <Content Include="Views\LUICalculation\_results.cshtml" />
     <Content Include="Views\LUICalculation\Error.cshtml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="Views\LUICalculation\_data.cshtml" />

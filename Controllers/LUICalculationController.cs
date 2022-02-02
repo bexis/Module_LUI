@@ -58,8 +58,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
         public ActionResult ShowPrimaryData(long datasetID)
         {
 
-            ComponentDataModel model = new ComponentDataModel();
-            model.ComponentData = DataAccess.GetComponentData(datasetID.ToString());
+            DataModel model = new DataModel();
+            model.Data = DataAccess.GetComponentData(datasetID.ToString());
 
             return PartialView("_data", model);
         }
@@ -90,6 +90,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // do the calucaltion
             var results = CalculateLui.DoCalc(model);
 
+            DataModel dataModel = new DataModel();
+            dataModel.Data = results;
+
             // store results in session
             Session[SESSION_TABLE] = results;
             if (null != Session[SESSION_FILE])
@@ -98,7 +101,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
             Session["LUICalModel"] = model;
 
-            return PartialView("_results", results);
+            return PartialView("_data", dataModel);
         }
 
 

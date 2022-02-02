@@ -6,13 +6,13 @@ using System.Web;
 
 namespace BExIS.Modules.Lui.UI.Models
 {
-    public class ComponentDataModel
+    public class DataModel
     {
-         public DataTable ComponentData { get; set; }
+         public DataTable Data { get; set; }
 
-        public ComponentDataModel()
+        public DataModel()
         {
-            ComponentData = new DataTable();
+            Data = new DataTable();
         }
     }
 }
