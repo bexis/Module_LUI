@@ -1,11 +1,9 @@
-﻿using BExIS.Dlm.Services.Helpers;
-using BExIS.IO.Transform.Output;
+﻿using BExIS.Modules.Lui.UI.Helper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
-using System.Web;
 
 namespace BExIS.Modules.Lui.UI.Models
 {
@@ -25,7 +23,17 @@ namespace BExIS.Modules.Lui.UI.Models
             //
 
             // source data
-            DataTable dt_sourceData = GetSourceLUIData(model.ComponentsSet.SelectedValue);
+            string dsId = "";
+            switch (model.ComponentsSet.SelectedValue)
+            {
+                case "old components set":
+                    dsId = Settings.get("lui:datasetOldComponentsSet").ToString();
+                    break;
+                case "new components set":
+                    dsId = Settings.get("lui:datasetNewComponentsSet").ToString();
+                    break;
+            }
+            DataTable dt_sourceData = DataAccess.GetComponentData(dsId);
 
             // result data
             DataTable dt_rslts = MakeResultsDT();
@@ -343,48 +351,6 @@ namespace BExIS.Modules.Lui.UI.Models
 
             return dt_rslts;
         }
-
-
-        /// <summary>
-        /// retrieve Source Data necessary for LUI calculation
-        /// </summary>
-        /// <returns></returns>
-        private static DataTable GetSourceLUIData(string componentsSet)
-        {
-            // get dataset ID
-            int dsId = 0;
-            switch (componentsSet)
-            {
-                case "old components set": 
-                dsId = (int)Settings.get("lui:datasetOldComponentsSet");
-                break;
-                case "new components set":
-                dsId = (int)Settings.get("lui:datasetNewComponentsSet");
-                break;
-            }
-
-            // get dataset
-            using (Dlm.Services.Data.DatasetManager dsm = new Dlm.Services.Data.DatasetManager())
-            {
-                Dlm.Entities.Data.DatasetVersion dsv = dsm.GetDatasetLatestVersion(dsId);
-
-                // convert
-                //DataTable dt = OutputDataManager.ConvertPrimaryDataToDatatable(dsm, dsv, "LUI input data", true ); => not woking anymore
-
-                DatasetConvertor datasetConvertor = new DatasetConvertor();
-                DataTable dt = datasetConvertor.ConvertDatasetVersion(dsm, dsv, "LUI input data");
-
-                // set column shortcuts
-                foreach (DataColumn col in dt.Columns)
-                {
-
-                    col.ColumnName = col.Caption;
-                }
-
-                return dt;
-            }
-        }
-
 
         /// <summary>
         /// initialize an empty LUI results table

@@ -1,11 +1,9 @@
-﻿using BExIS.IO.Transform.Output;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Web;
+
 using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Lui.UI.Helper
@@ -84,13 +82,28 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             // modify if special characters are present
 
-            if (value.IndexOfAny(AsciiHelper.GetAllSeperator().ToArray()) != -1)
+            if (value.IndexOfAny(GetAllSeperator().ToArray()) != -1)
             {
                 value = "\"" + value.Replace("\"", "\"\"") + "\"";
             }
             return value;
         }
 
+        /// <summary>
+        /// Get all text seperators as char in a list
+        /// </summary>
+        /// <returns>List of char </returns>
+        public static List<char> GetAllSeperator()
+        {
+            List<char> allSeperatorsAsChar = new List<char>();
+
+            allSeperatorsAsChar.Add(',');
+            allSeperatorsAsChar.Add(';');
+            allSeperatorsAsChar.Add(' ');
+            allSeperatorsAsChar.Add('\t');
+
+            return allSeperatorsAsChar;
+        }
 
     }
 }

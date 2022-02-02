@@ -1,24 +1,19 @@
 ﻿using BExIS.Modules.Lui.UI.Models;
 using System.Web.Mvc;
 using Vaiona.Web.Mvc.Models;
-using Vaiona.Web.Extensions;
 using System.Collections.Generic;
 using System;
 using System.Data;
 using System.Linq;
 using System.IO;
-using BExIS.IO.Transform.Output;
-using BExIS.Dlm.Services.Data;
-using BExIS.Dlm.Services.DataStructure;
-using System.Web.Routing;
-using Vaiona.Web.Mvc.Modularity;
-using Vaiona.Utils.Cfg;
 using System.Web;
 using BExIS.Modules.Lui.UI.Helper;
 using BExIS.Security.Services.Utilities;
 using BExIS.Security.Services.Subjects;
 using System.Net;
 using System.Web.Script.Serialization;
+using Vaiona.Web.Extensions;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -36,28 +31,24 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private static string FILE_NAMESPACE = Models.Settings.get("lui:filename:namespace") as string;
         #endregion
 
-        public int selectedDatasetId = 0;
-        //public int selectedDataStructureId = 0;
-
         // GET: Main
         public ActionResult Index()
         {
             if (checkPreconditions())
             {
-
                 // set page title
                 ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
-                // show the view
+                //create model
                 LUIQueryModel model = new LUIQueryModel();
-                model.MissingComponentData = GetMissingComponentData();
+                model.MissingComponentData = DataAccess.GetMissingComponentData();
                 model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-                model.NewComponentsSetDatasetVersion = GetDatasetInfo(model.NewComponentsSetDatasetId).Version;
+                model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId).Version;
                 return View("Index", model);
 
-            } else
+            } 
+            else
             {
-
                 // preconditions failed, show error page
                 return View("Error");
 
@@ -66,18 +57,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         public ActionResult ShowPrimaryData(long datasetID)
         {
-            long versionId = 0;
-            using (var datasetManager = new DatasetManager())
-            {
-                versionId = datasetManager.GetDatasetLatestVersion(datasetID).Id;
-            }
-            var view = this.Render("DDM", "Data", "ShowPrimaryData", new RouteValueDictionary()
-            {
-                { "datasetID", datasetID },
-                { "versionId", versionId }
-            });
 
-            return Content(view.ToHtmlString(), "text/html");
+            ComponentDataModel model = new ComponentDataModel();
+            model.ComponentData = DataAccess.GetComponentData(datasetID.ToString());
+
+            return PartialView("_data", model);
         }
 
         /// <summary>
@@ -187,7 +171,6 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns></returns>
         public ActionResult DownloadFile(string mimeType)
         {
-
             // make sure the file was created
             if ((null == Session[SESSION_FILE]) || !((Dictionary<string, string>)Session[SESSION_FILE]).ContainsKey(mimeType))
             {
@@ -212,16 +195,13 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
             }
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
-            long datasetId;
+            string datasetId;
             if (model.ComponentsSet.SelectedValue.Contains("old"))
-                datasetId = Convert.ToInt64(Models.Settings.get("lui:datasetOldComponentsSet"));
+                datasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
             else
-                datasetId = Convert.ToInt64(Models.Settings.get("lui:datasetNewComponentsSet"));
-            int version;
-            using (DatasetManager datasetManager = new DatasetManager())
-            {
-                version = datasetManager.GetDataset(datasetId).VersionNo;
-            }
+                datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+
+            string version = DataAccess.GetDatasetInfo(datasetId).Version; 
 
             string text = "LUI Calculation file <b>\"" + Path.GetFileName(path) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was downloaded by <b>" + user + "</b>";
             es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
@@ -250,216 +230,25 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private bool checkPreconditions()
         {
             // check for LUI new dataset
-            using (DatasetManager dm = new DatasetManager())
-            using (DataStructureManager dsm = new DataStructureManager())
-            {
-                int luiIdNew = (int)Models.Settings.get("lui:datasetNewComponentsSet");
-                bool exists = dm.DatasetRepo.Query()
-                                            .Where(x => x.Id == luiIdNew)
-                                            .Any();
-                if (!exists)
-                {
-                    return false;
-                }
+            bool exists = false;
+            string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+            var dataNew = DataAccess.GetComponentData(luiIdNew);
+            if (dataNew.Rows.Count == 0)
+                return exists == false;
 
-                // check for export data structure
-                int dsdId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
-                exists = dsm.StructuredDataStructureRepo.Query()
-                                        .Where(x => x.Id == dsdId)
-                                        .Any();
-                if (!exists)
-                {
-                    return false;
-                }
+            string dsdId = Models.Settings.get("lui:datastructureNewComponentsSet").ToString();
 
-                // check for LUI old dataset
-                int luiIdOld = (int)Models.Settings.get("lui:datasetOldComponentsSet");
-                exists = dm.DatasetRepo.Query()
-                                            .Where(x => x.Id == luiIdOld)
-                                            .Any();
-                if (!exists)
-                {
-                    return false;
-                }
+            // check for LUI old dataset
+            string luiIdOld = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+            var dataOld = DataAccess.GetComponentData(luiIdOld);
+            if (dataOld.Rows.Count == 0)
+                return exists == false;
 
-                // check for export data structure
+            int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
 
-                int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
-                exists = dsm.StructuredDataStructureRepo.Query()
-                                        .Where(x => x.Id == dsdIdOld)
-                                        .Any();
-                if (!exists)
-                {
-                    return false;
-                }
-
-                // if we came that far, all conditions are met
-                return true;
-            }
+            // if we came that far, all conditions are met
+            return true;
         }
-
-
-        /// <summary>
-        /// Get missing comp data
-        /// 
-        /// </summary>
-        /// <returns>List of missing component data. Years with missing ep plotids.</returns>
-        private List<MissingComponentData> GetMissingComponentData()
-        {
-            List<MissingComponentData> data = new List<MissingComponentData>();
-            DataAccess dataAccess = DataAccessHelper.ReadFile();
-            string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-
-            string link = dataAccess.ServerName + "/api/data/" + datasetId;
-            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
-
-            DataTable compData = new DataTable();
-            compData.Columns.Add("Year");
-            compData.Columns.Add("EP_PlotID");
-
-            try
-            {
-                // Get response  
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-                {
-                    // Get the response stream  
-                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        string line = String.Empty;
-                        string sep = "\t";
-                        String[] row = new String[4];
-                        int count = 0;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            count++;
-                            if (count > 1)
-                            {
-                                row = line.Split(',');
-                                DataRow dr = compData.NewRow();
-                                dr["Year"] = DateTime.Parse(row[0]).ToString("yyyy");
-                                dr["EP_PlotID"] = row[2];
-                                compData.Rows.Add(dr);
-                            }
-                        }
-                        response.Close();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-
-            }
-
-            //get all years where data rows less then 50, that means not all plots has data
-            var years = compData.AsEnumerable().GroupBy(x => x.Field<string>("Year")).Where(g => g.Count() < 50).ToList();
-
-            foreach (var i in years)
-            {
-                MissingComponentData missingComponentData = new MissingComponentData();
-                missingComponentData.Year = i.Select(a => a.Field<string>("Year")).FirstOrDefault();
-                List<string> availablePlots = compData.AsEnumerable().Where(x => x.Field<string>("Year") == missingComponentData.Year).Select(a => a.Field<string>("EP_PlotID")).ToList();
-                missingComponentData.PlotIds = getAllGrasslandPlots().Except(availablePlots).ToList();
-                data.Add(missingComponentData);
-            }
-
-            return data;
-
-        }
-
-        private DatasetObject GetDatasetInfo(string datasetId)
-        {
-            DataAccess dataAccess = DataAccessHelper.ReadFile();
-            string link = dataAccess.ServerName + "/api/dataset/" + datasetId;
-            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
-
-            DatasetObject myojb = new DatasetObject();
-
-            try
-            {
-                // Get response  
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-                {
-                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        JavaScriptSerializer js = new JavaScriptSerializer();
-                        var objText = reader.ReadToEnd();
-                        myojb = (DatasetObject)js.Deserialize(objText, typeof(DatasetObject));
-
-
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                string error = "Not data" + e.InnerException;
-            }
-
-            return myojb;
-
-        }
-
-        /// <summary>
-        /// get all ep plot ids from grasland plots
-        /// 
-        /// </summary>
-        /// <returns>list of grasland ep plot ids</returns>
-        private List<string> getAllGrasslandPlots()
-        {
-            DataAccess dataAccess = DataAccessHelper.ReadFile();
-            string datasetId = Models.Settings.get("lui:epPlotsDataset").ToString();
-
-            string link = dataAccess.ServerName + "/api/data/" + datasetId;
-            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            //request.PreAuthenticate = true;
-            request.Headers.Add("Authorization", "Bearer " + dataAccess.Token);
-
-            DataTable epPlotTable = new DataTable();
-            epPlotTable.Columns.Add("EP_Plotid");
-            epPlotTable.Columns.Add("LANDUSE");
-
-            try
-            {
-                // Get response  
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-                {
-                    // Get the response stream  
-                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        string line = String.Empty;
-                        string sep = "\t";
-                        String[] row = new String[4];
-                        int count = 0;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            count++;
-                            if (count > 1)
-                            {
-                                row = line.Split(',');
-                                DataRow dr = epPlotTable.NewRow();
-                                dr["EP_Plotid"] = row[0];
-                                dr["LANDUSE"] = row[3];
-                                epPlotTable.Rows.Add(dr);
-                            }
-                        }
-
-                        response.Close();
-                    }
-                }
-            }
-
-            catch (Exception e)
-            {
-
-            }
-
-            //get all grasland plots
-            List<string> graslandPlots = epPlotTable.AsEnumerable().Where((x => x.Field<string>("LANDUSE") == "G")).Select(a => a.Field<string>("EP_PlotID")).ToList();
-
-            return graslandPlots;
-        }
-        }
-
-      
     }
+
+}

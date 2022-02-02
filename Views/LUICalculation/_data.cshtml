@@ -1,0 +1,43 @@
+﻿@model  BExIS.Modules.Lui.UI.Models.ComponentDataModel
+
+<div id="download">
+
+</div>
+
+<div id="data">
+    <table id="regResults">
+        <thead>
+            <tr>
+                @for (int c = 0; c < Model.ComponentData.Columns.Count; c++)
+                {
+                    <th>
+                        @Model.ComponentData.Columns[c].ColumnName
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.ComponentData.Rows.Count; i++)
+            {
+                <tr>
+                    @for (int c = 0; c < Model.ComponentData.Columns.Count; c++)
+                    {
+                        <td>
+                            @Model.ComponentData.Rows[i][c].ToString()
+                        </td>
+
+                    }
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#regResults').DataTable();
+    });
+
+</script>
