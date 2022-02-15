@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
@@ -89,9 +90,12 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                 double NorgBiogas = row.Field<double>("Biogas_m3ha") * 4.4;
 
-                //Correct manure N for lagged release
+              
 
-                int Year = row.Field<int>("Year");
+
+
+
+
 
 
                 //Calculate total organic N or take direct measurements from the data table
@@ -116,6 +120,18 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             return null;
         }
+
+        private void CorrectManureN(DataTable NorgManure)
+        {
+            //Correct manure N for lagged release
+
+            //int Year = row.Field<int>("Year");
+            var years = landuseData.AsEnumerable().GroupBy(x => x.Field<int>("Year")).Where(g => g.Count() < 1).ToList();
+            var plotsIds = landuseData.AsEnumerable().Select(x => x.Field<string>("EP_PlotID")).ToList();
+
+
+        }
+
 
         private void DataCorrections()
         {

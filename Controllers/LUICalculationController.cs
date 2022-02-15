@@ -14,6 +14,10 @@ using System.Net;
 using System.Web.Script.Serialization;
 using Vaiona.Web.Extensions;
 using Vaiona.Utils.Cfg;
+using Ionic.Zip;
+using System.Xml;
+using System.Text;
+using BExIS.Utils.Extensions;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -57,6 +61,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         public ActionResult ShowPrimaryData(long datasetID)
         {
+            LUIQueryModel lUIQueryModel = new LUIQueryModel();
+            lUIQueryModel.RawVsCalc.SelectedValue = "unstandardized";
+            lUIQueryModel.DownloadDatasetId = datasetID.ToString();
+            Session["LUICalModel"] = lUIQueryModel;
 
             DataModel model = new DataModel();
             model.Data = DataAccess.GetComponentData(datasetID.ToString());
@@ -112,23 +120,23 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns></returns>
         public ActionResult PrepareDownloadFile(string mimeType)
         {
-
-            // if we have already a matching file cached, we can short circuit here
-            if ((null != Session[SESSION_FILE]) && ((Dictionary<string, string>)Session[SESSION_FILE]).ContainsKey(mimeType))
-            {
-                return Json(new { error = false, mimeType = mimeType }, JsonRequestBehavior.AllowGet);
-            }
-            long selectedDataStructureId = 0;
-            if (Session["DataStructureId"] != null)
-                selectedDataStructureId = (long)Session["DataStructureId"];
-
             // helper class
             DownloadManager downloadManager = new DownloadManager();
 
             // filename
             // use unix timestamp to make filenames unique
             string filename = Models.Settings.get("lui:filename:download") as string;
+
+            //result datatable
+            DataTable downloadData = new DataTable();
+
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
+            
+            if (model.RawVsCalc.SelectedValue == "unstandardized")
+              downloadData  = DataAccess.GetComponentData(model.DownloadDatasetId);
+            else
+                downloadData = Session[SESSION_TABLE] as DataTable;
+
             string mean = "";
             if (model.TypeOfMean.SelectedValue != "empty")
                 mean = "_" + model.TypeOfMean.SelectedValue;
@@ -143,7 +151,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 case "text/csv":
                 case "text/tsv":
-                    path = downloadManager.GenerateAsciiFile(FILE_NAMESPACE, Session[SESSION_TABLE] as DataTable, filename, mimeType);
+                    path = downloadManager.GenerateAsciiFile(FILE_NAMESPACE, downloadData as DataTable, filename, mimeType);
                     break;
 
                 case "application/vnd.ms-excel.sheet.macroEnabled.12":
@@ -156,13 +164,41 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     return Json(new { error = true, msg = "Unknown file-type: " + mimeType }, JsonRequestBehavior.AllowGet);
             }
 
+            //get metadata as html
+            XmlDocument xmlDocument = DataAccess.GetMetadata(model.DownloadDatasetId);
+            string htmlPage = PartialView("SimpleMetadata", xmlDocument).RenderToString();
+            string pathHtml = downloadManager.GenerateHtmlFile(htmlPage, model.DownloadDatasetId + "_metadata");
+
+            //get missing data when relavent
+            List<MissingComponentData> missingComponentData = DataAccess.GetMissingComponentData();
+            string version = DataAccess.GetDatasetInfo(model.DownloadDatasetId).Version;
+            string filenameMissingdata = model.DownloadDatasetId + "_" + "Version:" + version + "_" + "MissingComponentData";
+            string pathMissingData = downloadManager.GernateMissingDataFile(missingComponentData, filenameMissingdata);
+
+            string zipFilePath = Path.Combine(AppConfiguration.DataPath, "LuiData" + ".zip");
+            //create zip
+            using (ZipFile zip = new ZipFile())
+            {
+                zip.AddFile(path, "");
+                zip.AddFile(pathHtml, "");
+                zip.AddFile(pathMissingData, "");
+                zip.Save(zipFilePath);
+            }
+
+
+
             // store path in session for further download
             if (null == Session[SESSION_FILE])
             {
                 Session[SESSION_FILE] = new Dictionary<string, string>();
             }
-            ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType] = path;
 
+            ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType] = zipFilePath;
+
+
+
+
+            
             return Json(new { error = false, mimeType = mimeType }, JsonRequestBehavior.AllowGet);
         }
 
@@ -186,11 +222,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 }
             }
 
-            // get file path
-            string path = ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType];
+            // get data file path
+            string pathData = ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType];
 
+           
             //send mail
-
             var es = new EmailService();
             string user;
             using (UserManager userManager = new UserManager())
@@ -206,12 +242,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             string version = DataAccess.GetDatasetInfo(datasetId).Version; 
 
-            string text = "LUI Calculation file <b>\"" + Path.GetFileName(path) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was downloaded by <b>" + user + "</b>";
+            string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was downloaded by <b>" + user + "</b>";
             es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
 
 
             // return file for download
-            return File(path, mimeType, Path.GetFileName(path));
+            return File(pathData, mimeType, Path.GetFileName(pathData));
         }
 
         public ActionResult DownloadPDF(string fileName)

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Script.Serialization;
+using System.Xml;
 using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Lui.UI.Helper
@@ -24,6 +25,32 @@ namespace BExIS.Modules.Lui.UI.Helper
             ServerInformation serverInformation = Newtonsoft.Json.JsonConvert.DeserializeObject<ServerInformation>(text);
 
             return serverInformation;
+        }
+
+        /// <summary>
+        /// Get metadata
+        /// </summary>
+        /// <param name="datasetId"></param>
+        /// <returns>metadata from a dataset as xml document.</returns>
+        public static XmlDocument GetMetadata(string datasetId)
+        {
+            ServerInformation serverInformation = GetServerInformation();
+
+            string link = serverInformation.ServerName + "/api/metadata/" + datasetId;
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+
+            XmlDocument document = new XmlDocument();
+
+            using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+            {
+                document.Load(response.GetResponseStream());
+
+                response.Close();
+            }
+
+            return document;
+
         }
 
         /// <summary>

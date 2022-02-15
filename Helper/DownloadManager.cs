@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Modules.Lui.UI.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -33,6 +34,30 @@ namespace BExIS.Modules.Lui.UI.Helper
             }
 
             File.WriteAllText(path, data.ToString());
+            return path;
+        }
+
+        public string GenerateHtmlFile(string data, string filename)
+        {
+            string path = Path.Combine(AppConfiguration.DataPath, filename + ".html");
+            File.WriteAllText(path, data.ToString());
+            return path;
+        }
+
+        public string GernateMissingDataFile(List<MissingComponentData> missingComponentData, string filename)
+        {
+            StringBuilder missingData = new StringBuilder();
+            string path = Path.Combine(AppConfiguration.DataPath, filename + ".txt");
+            foreach(var m in missingComponentData)
+            {
+                missingData.AppendLine(m.Year);
+                foreach(var p in m.PlotIds)
+                {
+                    missingData.AppendLine(p);
+                }
+            }
+
+            File.WriteAllText(path, missingData.ToString());
             return path;
         }
 
