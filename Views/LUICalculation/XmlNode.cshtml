@@ -11,7 +11,12 @@
 else
 {
     <p>
-        <b>@Model.Name / @Model.NodeType.ToString() </b>
+        <b>
+            @if (@Model.Name.Contains("Type"))
+            {
+                <p style="background-color:#BEE1DA">@Model.Name.Replace("Type", "")</p>
+             }
+        </b>
 
         @foreach (var item in Model.ChildNodes)
         {

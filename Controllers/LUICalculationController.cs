@@ -171,17 +171,24 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             //get missing data when relavent
             List<MissingComponentData> missingComponentData = DataAccess.GetMissingComponentData();
-            string version = DataAccess.GetDatasetInfo(model.DownloadDatasetId).Version;
-            string filenameMissingdata = model.DownloadDatasetId + "_" + "Version:" + version + "_" + "MissingComponentData";
-            string pathMissingData = downloadManager.GernateMissingDataFile(missingComponentData, filenameMissingdata);
+            string pathMissingData = "";
+            if (missingComponentData.Count > 0)
+            {
+                string version = DataAccess.GetDatasetInfo(model.DownloadDatasetId).Version;
+                string filenameMissingdata = model.DownloadDatasetId + "_" + "Version_" + version + "_" + "MissingComponentData";
+                pathMissingData = downloadManager.GernateMissingDataFile(missingComponentData, filenameMissingdata);
+            }
+            
 
             string zipFilePath = Path.Combine(AppConfiguration.DataPath, "LuiData" + ".zip");
+
             //create zip
             using (ZipFile zip = new ZipFile())
             {
                 zip.AddFile(path, "");
                 zip.AddFile(pathHtml, "");
-                zip.AddFile(pathMissingData, "");
+                if(pathMissingData.Length > 0)
+                    zip.AddFile(pathMissingData, "");
                 zip.Save(zipFilePath);
             }
 
