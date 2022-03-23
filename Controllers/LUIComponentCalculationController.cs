@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.Modules.Lui.UI.Helper;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -19,6 +20,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         public ActionResult CalculateCompontents()
         {
+            string datasetId = "26487";
+            LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(DataAccess.GetLanuData(datasetId));
+            lUIComponentsCalculation.CalculateComponents();
 
             return View();
         }

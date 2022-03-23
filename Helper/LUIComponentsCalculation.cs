@@ -10,7 +10,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         public DataTable landuseData = new DataTable();
         public List<string> warnings = new List<string>();
 
-        LUIComponentsCalculation(DataTable data)
+        public LUIComponentsCalculation(DataTable data)
         {
             landuseData = data;
             DataCorrections();
@@ -45,6 +45,7 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             foreach (DataRow row in landuseData.Rows)
             {
+
                 #region TotalGrazing
                 //Calculate grazing intensities (grazing1-grazing4)
                 var Grazing1 = row.Field<double>("LivestockUnits1") * row.Field<double>("DayGrazing1") / row.Field<double>("GrazingArea1");
@@ -54,6 +55,8 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                 double TotalGrazing = Grazing1 + Grazing2 + Grazing3 + Grazing4;
                 TotalGrazing = System.Math.Round(TotalGrazing, 4);
+
+
                 #endregion
 
                 #region TotalFertilization
@@ -121,13 +124,26 @@ namespace BExIS.Modules.Lui.UI.Helper
             return null;
         }
 
-        private void CorrectManureN(DataTable NorgManure)
+        private void CorrectManureN(double NorgManure)
         {
             //Correct manure N for lagged release
 
             //int Year = row.Field<int>("Year");
             var years = landuseData.AsEnumerable().GroupBy(x => x.Field<int>("Year")).Where(g => g.Count() < 1).ToList();
             var plotsIds = landuseData.AsEnumerable().Select(x => x.Field<string>("EP_PlotID")).ToList();
+
+            //var NorgManureEff = 
+
+            for (int i = 0; i < plotsIds.Count; i++)
+            {
+               //var meanNorgManure = 
+
+                for (int j = 0; j< years.Count; j++)
+                {
+                    int year = int.Parse(landuseData.Rows[j]["Year"].ToString());
+                   
+                }
+            }
 
 
         }

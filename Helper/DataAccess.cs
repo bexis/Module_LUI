@@ -54,13 +54,79 @@ namespace BExIS.Modules.Lui.UI.Helper
         }
 
         /// <summary>
-        /// Get comp data
+        /// Get lanu data
         /// 
         /// </summary>
         /// <param name="datasetId"></param>
         /// <returns>Data table with comp dataset depents on dataset id.</returns>
-        public static DataTable GetComponentData(string datasetId)
+        public static DataTable GetLanuData(string datasetId)
         {
+            ServerInformation serverInformation = GetServerInformation();
+
+            string link = serverInformation.ServerName + "/api/data/" + datasetId;
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+
+            DataStructureObject dataStructureObject = GetDataStructure(1135);
+
+            DataTable lanuData = new DataTable();
+            foreach(var variable in dataStructureObject.Variables)
+            {
+                lanuData.Columns.Add(variable.Label);
+            }
+
+            try
+            {
+                // Get response  
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    // Get the response stream  
+                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        string line = String.Empty;
+                        string sep = "\t";
+                        String[] row = new String[4];
+                        int count = 0;
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            count++;
+                            if (count > 1)
+                            {
+                                //response row
+                                row = line.Split(',');
+                                DataRow dr = lanuData.NewRow();
+
+                                for (int j = 0; j < lanuData.Columns.Count; j++)
+                                {
+                                    for (int i = 0; i < row.Count(); i++)
+                                    {
+                                        dr[j] = row[i];
+                                    }
+                                }
+                                lanuData.Rows.Add(dr);
+                            }
+                        }
+                        response.Close();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return lanuData;
+        }
+
+
+            /// <summary>
+            /// Get comp data
+            /// 
+            /// </summary>
+            /// <param name="datasetId"></param>
+            /// <returns>Data table with comp dataset depents on dataset id.</returns>
+            public static DataTable GetComponentData(string datasetId)
+            {
             ServerInformation serverInformation = GetServerInformation();
 
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
@@ -189,6 +255,38 @@ namespace BExIS.Modules.Lui.UI.Helper
             return datasetObject;
         }
 
+        public static DataStructureObject GetDataStructure( long structId)
+        {
+            ServerInformation serverInformation = GetServerInformation();
+            string link = serverInformation.ServerName + "/api/structures/" + structId;
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+
+            DataStructureObject dataStructureObject = new DataStructureObject();
+
+            try
+            {
+                // Get response  
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                    {
+                        JavaScriptSerializer js = new JavaScriptSerializer();
+                        var objText = reader.ReadToEnd();
+                        dataStructureObject = (DataStructureObject)js.Deserialize(objText, typeof(DataStructureObject));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                string error = "Not data" + e.InnerException;
+            }
+
+            return dataStructureObject;
+        }
+
+
+
 
         /// <summary>
         /// get all ep plot ids from grasland plots
@@ -250,6 +348,9 @@ namespace BExIS.Modules.Lui.UI.Helper
             return graslandPlots;
         }
     }
+
+
+
     /// <summary>
     /// Class to store server information to access data via API
     /// 
@@ -260,6 +361,34 @@ namespace BExIS.Modules.Lui.UI.Helper
         public string ServerName { get; set; }
         public string Token { get; set; }
 
+    }
+
+    /// <summary>
+    /// Class to store dataset information receive via api
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public class DataStructureObject
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string inUse { get; set; }
+        public string Structured { get; set; }
+        public List<Variables> Variables { get; set; }
+    }
+
+    public class Variables
+    {
+        public string Id { get; set; }
+        public string Label { get; set; }
+        public string Description { get; set; }
+        public string isOptional { get; set; }
+        public string Unit { get; set; }
+        public string DataType { get; set; }
+        public string SystemType { get; set; }
+        public string AttributeName { get; set; }
+        public string AttributeDescription { get; set; }
     }
 
     /// <summary>
