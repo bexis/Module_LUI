@@ -42,7 +42,6 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             
 
-
             foreach (DataRow row in landuseData.Rows)
             {
 
@@ -70,10 +69,10 @@ namespace BExIS.Modules.Lui.UI.Helper
                     NorgManure = row.Field<double>("Manure_tha") * 4.9;
                 if (row.Field<string>("TypeManure") == "Schaf")
                     NorgManure = row.Field<double>("Manure_tha") * 8.13;
-                if (row.Field<string>("TypeManure") == "-1")
+               if (row.Field<string>("TypeManure") == "-1")
                     NorgManure = 0;
-                //else
-                //    NorgManure = "NA";
+               else
+                NorgManure = 0;
 
                 double NorgSlurry;
                 if (row.Field<string>("TypeSlurry") == "Rind")
@@ -88,17 +87,47 @@ namespace BExIS.Modules.Lui.UI.Helper
                     NorgSlurry = row.Field<double>("Slurry_m3ha") * 4.4;
                 if (row.Field<string>("TypeSlurry") == "-1")
                     NorgSlurry = 0;
-                //else
-                //    NorgManure = "NA";
+                else
+                    NorgSlurry = 0;
 
                 double NorgBiogas = row.Field<double>("Biogas_m3ha") * 4.4;
 
-              
+                //Correct manure N for lagged release
 
+                int year = int.Parse(row.Field<string>("Year"));
+                string year1 = (year - 1).ToString();
+                string year2 = (year - 2).ToString();
+                List<DataRow> pastYears = GetYearsBeforeData(year);
 
+                //get NorgManure for past years for current (in the loop row) year and plot
 
+                var NorgManureY1data = pastYears.AsEnumerable().Where(a => a.Field<string>("Year") == year1 && a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).FirstOrDefault();
+                double NorgManureY1;
+                if (NorgManureY1data.Field<string>("TypeManure") == "Rind")
+                    NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 5.6;
+                if (NorgManureY1data.Field<string>("TypeManure") == "Pferd")
+                    NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 4.9;
+                if (NorgManureY1data.Field<string>("TypeManure") == "Schaf")
+                    NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 8.13;
+                if (NorgManureY1data.Field<string>("TypeManure") == "-1")
+                    NorgManureY1 = 0;
+                else
+                    NorgManureY1 = 0;
 
+                var NorgManureY2data = pastYears.AsEnumerable().Where(a => a.Field<string>("Year") == year2 && a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).FirstOrDefault();
+                double NorgManureY2;
+                if (NorgManureY2data.Field<string>("TypeManure") == "Rind")
+                    NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 5.6;
+                if (NorgManureY2data.Field<string>("TypeManure") == "Pferd")
+                    NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 4.9;
+                if (NorgManureY2data.Field<string>("TypeManure") == "Schaf")
+                    NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 8.13;
+                if (NorgManureY2data.Field<string>("TypeManure") == "-1")
+                    NorgManureY2 = 0;
+                else
+                    NorgManureY2 = 0;
 
+                double NorgManureEff = (0.4 * NorgManure) + (0.3*NorgManureY1) + (0.3* NorgManureY2);
 
 
                 //Calculate total organic N or take direct measurements from the data table
@@ -106,46 +135,28 @@ namespace BExIS.Modules.Lui.UI.Helper
                 double Norg;
                 if (row.Field<string>("ExactValOrg") == "ja")
                     Norg = row.Field<double>("NorgExact");
-                //else
-               //Norg = 
+                else
+                    Norg = NorgManureEff + NorgSlurry + NorgBiogas;
 
-                    //Calculate TotalFertilization
+                //Calculate TotalFertilization
 
-                    //var TotalFertilization = row.Field<double>("minNitrogen_kgNha") + 
+                var TotalFertilization = row.Field<double>("minNitrogen_kgNha") + Norg;
 
-                    #endregion
+            #endregion
 
             }
-
-
-
-
 
             return null;
         }
 
-        private void CorrectManureN(double NorgManure)
+
+        private List<DataRow> GetYearsBeforeData(int year)
         {
-            //Correct manure N for lagged release
+            string year1 = (year-1).ToString();
+            string year2 = (year - 2).ToString();
+            var data = landuseData.AsEnumerable().Where(a => a.Field<string>("Year") == year1 || a.Field<string>("Year") == year2).ToList();
 
-            //int Year = row.Field<int>("Year");
-            var years = landuseData.AsEnumerable().GroupBy(x => x.Field<int>("Year")).Where(g => g.Count() < 1).ToList();
-            var plotsIds = landuseData.AsEnumerable().Select(x => x.Field<string>("EP_PlotID")).ToList();
-
-            //var NorgManureEff = 
-
-            for (int i = 0; i < plotsIds.Count; i++)
-            {
-               //var meanNorgManure = 
-
-                for (int j = 0; j< years.Count; j++)
-                {
-                    int year = int.Parse(landuseData.Rows[j]["Year"].ToString());
-                   
-                }
-            }
-
-
+            return data;
         }
 
 
