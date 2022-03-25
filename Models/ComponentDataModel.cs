@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Web;
+﻿using System.Data;
 
 namespace BExIS.Modules.Lui.UI.Models
 {
-    public class DataModel
+    public class ComponentDataModel
     {
-         public DataTable Data { get; set; }
+        public DataTable Data { get; set; }
 
-        public DataModel()
+        public ComponentDataModel()
         {
             Data = new DataTable();
         }
+        public ComponentDataModel(DataTable data)
+        {
+            Data = data;
+        }
+
     }
 }

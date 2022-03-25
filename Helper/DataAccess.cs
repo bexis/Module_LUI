@@ -72,7 +72,9 @@ namespace BExIS.Modules.Lui.UI.Helper
             DataTable lanuData = new DataTable();
             foreach(var variable in dataStructureObject.Variables)
             {
-                lanuData.Columns.Add(variable.Label);
+                DataColumn col = new DataColumn(variable.Label);
+                col.DataType = System.Type.GetType("System."+ variable.SystemType);
+                lanuData.Columns.Add(col);
             }
 
             try
@@ -84,7 +86,7 @@ namespace BExIS.Modules.Lui.UI.Helper
                     using (StreamReader reader = new StreamReader(response.GetResponseStream()))
                     {
                         string line = String.Empty;
-                        string sep = "\t";
+                        string sep = "|";
                         String[] row = new String[4];
                         int count = 0;
                         while ((line = reader.ReadLine()) != null)
@@ -93,16 +95,16 @@ namespace BExIS.Modules.Lui.UI.Helper
                             if (count > 1)
                             {
                                 //response row
+                                //sep problem find differnent
+
                                 row = line.Split(',');
                                 DataRow dr = lanuData.NewRow();
 
                                 for (int j = 0; j < lanuData.Columns.Count; j++)
                                 {
-                                    for (int i = 0; i < row.Count(); i++)
-                                    {
-                                        dr[j] = row[i];
-                                    }
+                                  dr[lanuData.Columns[j].ColumnName] = row[j];
                                 }
+                                
                                 lanuData.Rows.Add(dr);
                             }
                         }

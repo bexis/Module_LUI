@@ -7,13 +7,12 @@ namespace BExIS.Modules.Lui.UI.Helper
 {
     public class LUIComponentsCalculation
     {
-        public DataTable landuseData = new DataTable();
-        public List<string> warnings = new List<string>();
-
+        public DataTable landuseData;
+        public List<string> warnings;
         public LUIComponentsCalculation(DataTable data)
         {
             landuseData = data;
-            DataCorrections();
+            //DataCorrections();
         }
 
         public DataTable CalculateComponents()
@@ -40,10 +39,16 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             #endregion
 
-            
-
             foreach (DataRow row in landuseData.Rows)
             {
+                DataRow dr = luiComponents.NewRow();
+                dr["Year"] = row.Field<string>("Year");
+                dr["Exploratory"] = row.Field<string>("Exploratory");
+                dr["EP_PlotID"] = row.Field<string>("EP_PlotID");
+                dr["isVIP"] = "";
+                dr["isMIP"] = "";
+
+                dr["TotalMowing"] = row.Field<string>("Cuts");
 
                 #region TotalGrazing
                 //Calculate grazing intensities (grazing1-grazing4)
@@ -55,6 +60,7 @@ namespace BExIS.Modules.Lui.UI.Helper
                 double TotalGrazing = Grazing1 + Grazing2 + Grazing3 + Grazing4;
                 TotalGrazing = System.Math.Round(TotalGrazing, 4);
 
+                dr["TotalGrazing"] = TotalGrazing;
 
                 #endregion
 
@@ -142,11 +148,14 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                 var TotalFertilization = row.Field<double>("minNitrogen_kgNha") + Norg;
 
-            #endregion
+                dr["TotalFertilization"] = TotalFertilization;
 
+                #endregion
+
+                luiComponents.Rows.Add(dr);
             }
 
-            return null;
+            return luiComponents;
         }
 
 
@@ -163,14 +172,14 @@ namespace BExIS.Modules.Lui.UI.Helper
         private void DataCorrections()
         {
             //Interpolate missing data of fertilization -> not needed because the case is very rare
-           var slurryNAs = landuseData.AsEnumerable().Where(r => r.Field<int>("Slurry_m3ha") == -999999 && r.Field<int>("TypeSlurry") == 999999);
+           var slurryNAs = landuseData.AsEnumerable().Where(r => r.Field<string>("Slurry_m3ha") == "-999999" && r.Field<string>("TypeSlurry") == "999999");
 
             foreach(var row in slurryNAs)
             {
                 warnings.Add("Slurry_m3ha and TypeSlurry == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<string>("Year"));
             }
 
-            var NitrogenNAs = landuseData.AsEnumerable().Where(r => r.Field<int>("minNitrogen_kgNha") == -999999);
+            var NitrogenNAs = landuseData.AsEnumerable().Where(r => r.Field<string>("minNitrogen_kgNha") == "-999999");
 
             foreach (var row in NitrogenNAs)
             {
@@ -205,25 +214,25 @@ namespace BExIS.Modules.Lui.UI.Helper
             }
 
             //Replace missing values (zeros) in GrazingArea with SizeManagementUnit
-            var GrazingArea1ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<int>("GrazingArea1") == 0 && (r.Field<int>("LivestockUnits1") > 0 || r.Field<int>("DayGrazing1") > 0));
+            var GrazingArea1ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<double>("GrazingArea1") == 0 && ((r.Field<double>("LivestockUnits1") > 0) || (r.Field<double>("DayGrazing1")) > 0));
             foreach (var row in GrazingArea1ReplaceRows)
             {
                 row.SetField("GrazingArea1", row.Field<string>("SizeManagementUnit"));
 
             }
-            var GrazingArea2ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<int>("GrazingArea2") == 0 && (r.Field<int>("LivestockUnits2") > 0 || r.Field<int>("DayGrazing2") > 0));
+            var GrazingArea2ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<double>("GrazingArea2") == 0 && (r.Field<double>("LivestockUnits2") > 0 || r.Field<double>("DayGrazing2") > 0));
             foreach (var row in GrazingArea2ReplaceRows)
             {
                 row.SetField("GrazingArea1", row.Field<string>("SizeManagementUnit"));
 
             }
-            var GrazingArea3ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<int>("GrazingArea3") == 0 && (r.Field<int>("LivestockUnits3") > 0 || r.Field<int>("DayGrazing3") > 0));
+            var GrazingArea3ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<double>("GrazingArea3") == 0 && (r.Field<double>("LivestockUnits3") > 0 || r.Field<double>("DayGrazing3") > 0));
             foreach (var row in GrazingArea3ReplaceRows)
             {
                 row.SetField("GrazingArea1", row.Field<string>("SizeManagementUnit"));
 
             }
-            var GrazingArea4ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<int>("GrazingArea4") == 0 && (r.Field<int>("LivestockUnits4") > 0 || r.Field<int>("DayGrazing4") > 0));
+            var GrazingArea4ReplaceRows = landuseData.AsEnumerable().Where(r => r.Field<double>("GrazingArea4") == 0 && (r.Field<double>("LivestockUnits4") > 0 || r.Field<double>("DayGrazing4") > 0));
             foreach (var row in GrazingArea4ReplaceRows)
             {
                 row.SetField("GrazingArea1", row.Field<string>("SizeManagementUnit"));

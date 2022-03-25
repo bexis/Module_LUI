@@ -190,6 +190,7 @@
     <Compile Include="Helper\Settings.cs" />
     <Compile Include="LUIModule.cs" />
     <Compile Include="Models\ComponentDataModel.cs" />
+    <Compile Include="Models\DataModel.cs" />
     <Compile Include="Models\LUIQueryModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -209,6 +210,7 @@
     <Content Include="Views\LUICalculation\_data.cshtml" />
     <Content Include="Views\LUICalculation\SimpleMetadata.cshtml" />
     <Content Include="Views\LUICalculation\XmlNode.cshtml" />
+    <Content Include="Views\LUIComponentCalculation\ComponentCalculation.cshtml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -218,7 +220,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="fonts\" />
-    <Folder Include="Views\LUIComponentCalculation\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Components\AAA\BExIS.Security.Entities\BExIS.Security.Entities.csproj">
