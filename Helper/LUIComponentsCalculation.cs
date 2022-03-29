@@ -8,10 +8,12 @@ namespace BExIS.Modules.Lui.UI.Helper
     public class LUIComponentsCalculation
     {
         public DataTable landuseData;
+        public DataTable landuseFullData;
         public List<string> warnings;
-        public LUIComponentsCalculation(DataTable data)
+        public LUIComponentsCalculation(DataTable data, DataTable fullData)
         {
             landuseData = data;
+            landuseFullData = fullData;
             //DataCorrections();
         }
 
@@ -30,7 +32,7 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             #region check TotalMowing
 
-            var totalMowing = landuseData.AsEnumerable().Select(r => r.Field<int>("Cuts"));
+            var totalMowing = landuseData.AsEnumerable().Select(r => r.Field<long>("Cuts")).ToList(); ;
             int sumNa = totalMowing.Where(a => a.Equals(-999999)).Count();
             if (sumNa > 0)
             {
@@ -42,13 +44,14 @@ namespace BExIS.Modules.Lui.UI.Helper
             foreach (DataRow row in landuseData.Rows)
             {
                 DataRow dr = luiComponents.NewRow();
-                dr["Year"] = row.Field<string>("Year");
+                dr["Year"] = row.Field<DateTime>("Year");
                 dr["Exploratory"] = row.Field<string>("Exploratory");
                 dr["EP_PlotID"] = row.Field<string>("EP_PlotID");
+                //get MIP/VIP info
                 dr["isVIP"] = "";
                 dr["isMIP"] = "";
 
-                dr["TotalMowing"] = row.Field<string>("Cuts");
+                dr["TotalMowing"] = row.Field<long>("Cuts");
 
                 #region TotalGrazing
                 //Calculate grazing intensities (grazing1-grazing4)
@@ -100,7 +103,7 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                 //Correct manure N for lagged release
 
-                int year = int.Parse(row.Field<string>("Year"));
+                int year = int.Parse(row.Field<DateTime>("Year").ToString("yyyy"));
                 string year1 = (year - 1).ToString();
                 string year2 = (year - 2).ToString();
                 List<DataRow> pastYears = GetYearsBeforeData(year);
@@ -108,30 +111,36 @@ namespace BExIS.Modules.Lui.UI.Helper
                 //get NorgManure for past years for current (in the loop row) year and plot
 
                 var NorgManureY1data = pastYears.AsEnumerable().Where(a => a.Field<string>("Year") == year1 && a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).FirstOrDefault();
-                double NorgManureY1;
-                if (NorgManureY1data.Field<string>("TypeManure") == "Rind")
-                    NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 5.6;
-                if (NorgManureY1data.Field<string>("TypeManure") == "Pferd")
-                    NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 4.9;
-                if (NorgManureY1data.Field<string>("TypeManure") == "Schaf")
-                    NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 8.13;
-                if (NorgManureY1data.Field<string>("TypeManure") == "-1")
-                    NorgManureY1 = 0;
-                else
-                    NorgManureY1 = 0;
+                double NorgManureY1 = 0;
+                if (NorgManureY1data != null)
+                {
+                    if (NorgManureY1data.Field<string>("TypeManure") == "Rind")
+                        NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 5.6;
+                    if (NorgManureY1data.Field<string>("TypeManure") == "Pferd")
+                        NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 4.9;
+                    if (NorgManureY1data.Field<string>("TypeManure") == "Schaf")
+                        NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 8.13;
+                    if (NorgManureY1data.Field<string>("TypeManure") == "-1")
+                        NorgManureY1 = 0;
+                    else
+                        NorgManureY1 = 0;
+                }
 
                 var NorgManureY2data = pastYears.AsEnumerable().Where(a => a.Field<string>("Year") == year2 && a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).FirstOrDefault();
-                double NorgManureY2;
-                if (NorgManureY2data.Field<string>("TypeManure") == "Rind")
-                    NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 5.6;
-                if (NorgManureY2data.Field<string>("TypeManure") == "Pferd")
-                    NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 4.9;
-                if (NorgManureY2data.Field<string>("TypeManure") == "Schaf")
-                    NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 8.13;
-                if (NorgManureY2data.Field<string>("TypeManure") == "-1")
-                    NorgManureY2 = 0;
-                else
-                    NorgManureY2 = 0;
+                double NorgManureY2 = 0;
+                if (NorgManureY2data != null)
+                {
+                    if (NorgManureY2data.Field<string>("TypeManure") == "Rind")
+                        NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 5.6;
+                    if (NorgManureY2data.Field<string>("TypeManure") == "Pferd")
+                        NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 4.9;
+                    if (NorgManureY2data.Field<string>("TypeManure") == "Schaf")
+                        NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 8.13;
+                    if (NorgManureY2data.Field<string>("TypeManure") == "-1")
+                        NorgManureY2 = 0;
+                    else
+                        NorgManureY2 = 0;
+                }
 
                 double NorgManureEff = (0.4 * NorgManure) + (0.3*NorgManureY1) + (0.3* NorgManureY2);
 
@@ -163,7 +172,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string year1 = (year-1).ToString();
             string year2 = (year - 2).ToString();
-            var data = landuseData.AsEnumerable().Where(a => a.Field<string>("Year") == year1 || a.Field<string>("Year") == year2).ToList();
+            var data = landuseFullData.AsEnumerable().Where(a => a.Field<DateTime>("Year").ToString("yyyy") == year1 || a.Field<DateTime>("Year").ToString("yyyy") == year2).ToList();
 
             return data;
         }

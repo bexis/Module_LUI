@@ -23,7 +23,13 @@ namespace BExIS.Modules.Lui.UI.Controllers
         public ActionResult CalculateCompontents()
         {
             string datasetId = "26487";
-            LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(DataAccess.GetLanuData(datasetId));
+            DataTable lanuFullData = DataAccess.GetLanuData(datasetId);
+            //get only last year
+            var lastYear = lanuFullData.AsEnumerable().Select(a => a.Field<DateTime>("Year")).Distinct().ToList().Max();
+            DataTable lanuData = lanuFullData.AsEnumerable()
+                                .Where(r => r.Field<DateTime>("Year") == lastYear).CopyToDataTable();
+
+            LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(lanuData, lanuFullData);
             DataTable compData = lUIComponentsCalculation.CalculateComponents();
             ComponentDataModel model = new ComponentDataModel(compData);
 

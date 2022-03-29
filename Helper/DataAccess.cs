@@ -1,7 +1,11 @@
 ﻿using BExIS.Modules.Lui.UI.Models;
+using CsvHelper;
+using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -66,14 +70,15 @@ namespace BExIS.Modules.Lui.UI.Helper
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            // request.ContentType = "application/json";
 
             DataStructureObject dataStructureObject = GetDataStructure(1135);
 
             DataTable lanuData = new DataTable();
-            foreach(var variable in dataStructureObject.Variables)
+            foreach (var variable in dataStructureObject.Variables)
             {
                 DataColumn col = new DataColumn(variable.Label);
-                col.DataType = System.Type.GetType("System."+ variable.SystemType);
+                col.DataType = System.Type.GetType("System." + variable.SystemType);
                 lanuData.Columns.Add(col);
             }
 
@@ -83,31 +88,30 @@ namespace BExIS.Modules.Lui.UI.Helper
                 using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
                 {
                     // Get the response stream  
-                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                    using (TextReader reader = new StreamReader(response.GetResponseStream()))
+                    using (var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture))
                     {
-                        string line = String.Empty;
-                        string sep = "|";
-                        String[] row = new String[4];
-                        int count = 0;
-                        while ((line = reader.ReadLine()) != null)
+
+                        var records = csvReader.GetRecords<dynamic>();
+
+                        foreach (var r in records)
                         {
-                            count++;
-                            if (count > 1)
+                            var l = Enumerable.ToList(r);
+
+                            DataRow dr = lanuData.NewRow();
+                            String[] row = new String[4];
+                            for (int j = 0; j < lanuData.Columns.Count; j++)
                             {
-                                //response row
-                                //sep problem find differnent
-
-                                row = line.Split(',');
-                                DataRow dr = lanuData.NewRow();
-
-                                for (int j = 0; j < lanuData.Columns.Count; j++)
-                                {
-                                  dr[lanuData.Columns[j].ColumnName] = row[j];
-                                }
-                                
-                                lanuData.Rows.Add(dr);
+                                dr[lanuData.Columns[j].ColumnName] = l[j].Value;
                             }
+
+                            lanuData.Rows.Add(dr);
                         }
+
+                        //JavaScriptSerializer js = new JavaScriptSerializer();
+                        //var objText = reader.ReadToEnd();
+                        //lanuData = (DataTable)JsonConvert.DeserializeObject(objText, (typeof(DataTable)));
+
                         response.Close();
                     }
                 }
