@@ -3,11 +3,13 @@ using BExIS.Modules.Lui.UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -22,139 +24,61 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         public ActionResult CalculateCompontents()
         {
-            string datasetId = "26487";
-            DataTable lanuFullData = DataAccess.GetLanuData(datasetId);
+            Session["ComponentData"] = null;
+            string datasetId = Models.Settings.get("lui:lanuDataset").ToString();
+            //get data structureId
+            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId).DataStructureId, CultureInfo.InvariantCulture);
+
+            DataTable lanuFullData = DataAccess.GetData(datasetId, structureId);
+
             //get only last year
             var lastYear = lanuFullData.AsEnumerable().Select(a => a.Field<DateTime>("Year")).Distinct().ToList().Max();
             DataTable lanuData = lanuFullData.AsEnumerable()
                                 .Where(r => r.Field<DateTime>("Year") == lastYear).CopyToDataTable();
 
-            LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(lanuData, lanuFullData);
+            //get plottype infos
+            string datasetIdPlots = Models.Settings.get("lui:epPlotsDataset").ToString();
+            //get data structureId
+            long structureIdPlots = long.Parse(DataAccess.GetDatasetInfo(datasetIdPlots).DataStructureId, CultureInfo.InvariantCulture);
+            DataTable plotTypes = DataAccess.GetData(datasetIdPlots, structureIdPlots);
+
+            LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(lanuData, lanuFullData, plotTypes);
             DataTable compData = lUIComponentsCalculation.CalculateComponents();
             ComponentDataModel model = new ComponentDataModel(compData);
+            Session["ComponentData"] = model;
 
             return View("ComponentCalculation", model);
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        private DataTable GetLanduseData()
+        public ActionResult Download()
         {
-            string serverName = "";
-            string datasetId= "";
-            string token = "";
+            ComponentDataModel data = Session["ComponentData"] as ComponentDataModel;
 
-            string link = serverName + "/api/data/" + datasetId;
-            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + token);
+            var lines = new List<string>();
+            string[] columnNames = data.Data.Columns
+                    .Cast<DataColumn>()
+                    .Select(column => column.ColumnName)
+                    .ToArray();
 
-            DataTable landuseData = new DataTable();
-            landuseData.Columns.Add("Exploratory");
-            landuseData.Columns.Add("Year");
-            landuseData.Columns.Add("EP_PlotID");
-            landuseData.Columns.Add("SizeManagementUnit");
+            var header = string.Join(",", columnNames.Select(name => $"\"{name}\""));
+            lines.Add(header);
 
-            landuseData.Columns.Add("Cuts");
+            var valueLines = data.Data.AsEnumerable()
+                .Select(row => string.Join(",", row.ItemArray.Select(val => $"\"{val}\"")));
 
-            landuseData.Columns.Add("Manure_tha");
-            landuseData.Columns.Add("TypeManure");
-            landuseData.Columns.Add("Slurry_m3ha");
-            landuseData.Columns.Add("TypeSlurry");
-            landuseData.Columns.Add("Biogas_m3ha");
-            landuseData.Columns.Add("ExactValOrg");
-            landuseData.Columns.Add("NorgExact");
-            landuseData.Columns.Add("minNitrogen_kgNha");
+            lines.AddRange(valueLines);
 
-            landuseData.Columns.Add("LivestockUnits1");
-            landuseData.Columns.Add("DayGrazing1");
-            landuseData.Columns.Add("GrazingArea1");
-            landuseData.Columns.Add("LivestockUnits2");
-            landuseData.Columns.Add("DayGrazing2");
-            landuseData.Columns.Add("GrazingArea2");
-            landuseData.Columns.Add("LivestockUnits3");
-            landuseData.Columns.Add("DayGrazing3");
-            landuseData.Columns.Add("GrazingArea3");
-            landuseData.Columns.Add("LivestockUnits4");
-            landuseData.Columns.Add("DayGrazing4");
-            landuseData.Columns.Add("GrazingArea4");
+            string eventName;
 
+            //remove invaid chars in eventname for filename
+            string filename = "ComponentData_";
 
-            try
-            {
-                // Get response  
-                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
-                {
-                    // Get the response stream  
-                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        string line = String.Empty;
-                        string sep = "\t";
-                        String[] row = new String[4];
-                        int count = 0;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            count++;
-                            if (count > 1)
-                            {
-                                row = line.Split(',');
-                                DataRow dr = landuseData.NewRow();
+            string dataPath = AppConfiguration.DataPath;
+            string storePath = Path.Combine(dataPath, "LUI", "Temp", filename + ".csv");
 
-                                dr["Exploratory"] = row[0];
-                                dr["Year"] = row[1];
-                                dr["EP_PlotID"] = row[5];
-                                dr["SizeManagementUnit"] = row[7];
+            System.IO.File.WriteAllLines(storePath, lines);
 
-                                dr["Cuts"] = row[89];
-
-                                dr["Manure_tha"] = row[155];
-                                dr["TypeManure"] = row[156];
-                                dr["Slurry_m3ha"] = row[157];
-                                dr["TypeSlurry"] = row[158];
-                                dr["Biogas_m3ha"] = row[159];
-                                dr["ExactValOrg"] = row[163];
-                                dr["NorgExact"] = row[164];
-                                dr["minNitrogen_kgNha"] = row[167];
-
-                                dr["LivestockUnits1"] = row[44];
-                                dr["DayGrazing1"] = row[46];
-                                dr["GrazingArea1"] = row[47];
-                                dr["LivestockUnits2"] = row[57];
-                                dr["DayGrazing2"] = row[59];
-                                dr["GrazingArea2"] = row[60];
-                                dr["LivestockUnits3"] = row[70];
-                                dr["DayGrazing3"] = row[72];
-                                dr["GrazingArea3"] = row[73];
-                                dr["LivestockUnits4"] = row[83];
-                                dr["DayGrazing4"] = row[85];
-                                dr["GrazingArea4"] = row[86];
-
-                                landuseData.Rows.Add(dr);
-                            }
-                        }
-                        response.Close();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-
-            }
-
-
-
-            return landuseData;
+            return File(storePath, MimeMapping.GetMimeMapping("ComponentData" + ".csv"), Path.GetFileName(storePath));
         }
-    
-
     }
 }

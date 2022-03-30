@@ -63,7 +63,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// </summary>
         /// <param name="datasetId"></param>
         /// <returns>Data table with comp dataset depents on dataset id.</returns>
-        public static DataTable GetLanuData(string datasetId)
+        public static DataTable GetData(string datasetId, long structureId)
         {
             ServerInformation serverInformation = GetServerInformation();
 
@@ -72,23 +72,25 @@ namespace BExIS.Modules.Lui.UI.Helper
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
             // request.ContentType = "application/json";
 
-            DataStructureObject dataStructureObject = GetDataStructure(1135);
+            DataStructureObject dataStructureObject = GetDataStructure(structureId);
 
-            DataTable lanuData = new DataTable();
+            DataTable data = new DataTable();
             foreach (var variable in dataStructureObject.Variables)
             {
                 DataColumn col = new DataColumn(variable.Label);
                 col.DataType = System.Type.GetType("System." + variable.SystemType);
-                lanuData.Columns.Add(col);
+                col.AllowDBNull = true;
+                data.Columns.Add(col);
             }
 
+            string a = "";
             try
             {
                 // Get response  
                 using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
                 {
                     // Get the response stream  
-                    using (TextReader reader = new StreamReader(response.GetResponseStream()))
+                    using (StreamReader reader = new StreamReader(response.GetResponseStream()))
                     using (var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture))
                     {
 
@@ -96,16 +98,22 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                         foreach (var r in records)
                         {
+                           
                             var l = Enumerable.ToList(r);
 
-                            DataRow dr = lanuData.NewRow();
+                            DataRow dr = data.NewRow();
                             String[] row = new String[4];
-                            for (int j = 0; j < lanuData.Columns.Count; j++)
+                            for (int j = 0; j < data.Columns.Count; j++)
                             {
-                                dr[lanuData.Columns[j].ColumnName] = l[j].Value;
+                                a = l[j].Value;
+                                if (String.IsNullOrEmpty(l[j].Value))
+                                    dr[data.Columns[j].ColumnName] = DBNull.Value;
+                                else
+                                    dr[data.Columns[j].ColumnName] = l[j].Value;
+                               
                             }
 
-                            lanuData.Rows.Add(dr);
+                            data.Rows.Add(dr);
                         }
 
                         //JavaScriptSerializer js = new JavaScriptSerializer();
@@ -118,10 +126,11 @@ namespace BExIS.Modules.Lui.UI.Helper
             }
             catch (Exception e)
             {
-
+                string t = a;
             }
+        
 
-            return lanuData;
+            return data;
         }
 
 

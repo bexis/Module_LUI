@@ -2,36 +2,41 @@
 @model ComponentDataModel
 
 
-@Html.ActionLink("Calculate ", "CalculateCompontents", "LUIComponentCalculation", new { @class = "bx-button small function", target = "_blank" })
-
+@Html.ActionLink("Calculate ", "CalculateCompontents", "LUIComponentCalculation", new { @class = "bx-button small function" })
+<br />
+<br />
 @if (Model.Data.Rows.Count > 0)
 {
-<table id="compontentData">
-<thead>
-        <tr>
-            @for (int c = 0; c < Model.Data.Columns.Count; c++)
+    <table id="compontentData">
+        <thead>
+            <tr>
+                @for (int c = 0; c < Model.Data.Columns.Count; c++)
+                {
+                    <th>
+                        @Model.Data.Columns[c].ColumnName
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Data.Rows.Count; i++)
             {
-                <th>
-                    @Model.Data.Columns[c].ColumnName
-                </th>
+                <tr>
+                    @for (int c = 0; c < Model.Data.Columns.Count; c++)
+                    {
+                        <td>
+                            @Model.Data.Rows[i][c].ToString()
+                        </td>
+                    }
+                </tr>
             }
-        </tr>
-    </thead>
-    <tbody>
-        @for (int i = 0; i < Model.Data.Rows.Count; i++)
-        {
-        <tr>
-            @for (int c = 0; c < Model.Data.Columns.Count; c++)
-            {
-                <td>
-                    @Model.Data.Rows[i][c].ToString()
-                </td>
-            }
-        </tr>
-        }
 
-    </tbody>
-</table>
+        </tbody>
+    </table>
+    <br />
+    @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
+
+
 }
 
 <script type="text/javascript">
