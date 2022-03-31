@@ -71,7 +71,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string eventName;
 
             //remove invaid chars in eventname for filename
-            string filename = "ComponentData_";
+            string filename = "Lanu_ComponentData_"+ DateTime.Now.ToString("yyyy-MM-dd");
 
             string dataPath = AppConfiguration.DataPath;
             string storePath = Path.Combine(dataPath, "LUI", "Temp", filename + ".csv");

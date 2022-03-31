@@ -59,9 +59,17 @@ namespace BExIS.Modules.Lui.UI.Helper
                 #region TotalGrazing
                 //Calculate grazing intensities (grazing1-grazing4)
                 var Grazing1 = row.Field<double>("LivestockUnits1") * row.Field<double>("DayGrazing1") / row.Field<double>("GrazingArea1");
+                if (double.IsNaN(Grazing1))
+                    Grazing1 = 0;
                 var Grazing2 = row.Field<double>("LivestockUnits2") * row.Field<double>("DayGrazing2") / row.Field<double>("GrazingArea2");
+                if (double.IsNaN(Grazing2))
+                    Grazing2 = 0;
                 var Grazing3 = row.Field<double>("LivestockUnits3") * row.Field<double>("DayGrazing3") / row.Field<double>("GrazingArea3");
+                if (double.IsNaN(Grazing3))
+                    Grazing3 = 0;
                 var Grazing4 = row.Field<double>("LivestockUnits4") * row.Field<double>("DayGrazing4") / row.Field<double>("GrazingArea4");
+                if (double.IsNaN(Grazing4))
+                    Grazing4 = 0;
 
                 double TotalGrazing = Grazing1 + Grazing2 + Grazing3 + Grazing4;
                 TotalGrazing = System.Math.Round(TotalGrazing, 4);
