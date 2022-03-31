@@ -180,7 +180,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
             
 
-            string zipFilePath = Path.Combine(AppConfiguration.DataPath, "LuiData" + ".zip");
+            string zipFilePath = Path.Combine(AppConfiguration.DataPath, "LUI", "Temp", "LuiData" + ".zip");
 
             //create zip
             using (ZipFile zip = new ZipFile())
