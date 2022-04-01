@@ -1,9 +1,7 @@
 ﻿using BExIS.Security.Entities.Objects;
 using BExIS.Security.Services.Objects;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Lui.UI.Helper
@@ -24,7 +22,7 @@ namespace BExIS.Modules.Lui.UI.Helper
                 Feature luiFeature = featureManager.FeatureRepository.Get().FirstOrDefault(f => f.Name.Equals("LUI Tool"));
                 if (luiFeature == null) luiFeature = featureManager.Create("LUI Tool", "LUI Tool", rootDataToolsFeature);
 
-                operationManager.Create("LUI", "Main", "*", luiFeature);
+                operationManager.Create("LUI", "LUICalculation", "*", luiFeature);
 
 
             }

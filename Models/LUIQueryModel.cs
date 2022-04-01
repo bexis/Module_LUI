@@ -24,6 +24,9 @@ namespace BExIS.Modules.Lui.UI.Models
 
         public string NewComponentsSetDatasetVersion { get; set; }
 
+        public string DownloadDatasetId { get; set; }
+
+
         public LUIQueryModel()
         {
             // initiate model

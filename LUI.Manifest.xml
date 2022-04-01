@@ -22,6 +22,12 @@
             controller="LUICalculation" action="index"
             extends="./menubarRoot/dataTools" />
     
+       <Export tag="settings" id="mangeEvents" order="20"
+            title="LUI Compontent Calculation" description="LUI Compontent Calculation" icon=""
+            controller="LUIComponentCalculation" action="Index"
+            extends="./settingsRoot" />
+
+    
 	<!-- Settings Example-->
     <!--<Export tag="settings" id="manageMetadata" order="1"
             title="Manage Metadata Structure" description="Edit or Importa new Metadata Structure" icon=""

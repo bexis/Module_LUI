@@ -88,6 +88,9 @@
                         // add data to result
                         $('#divResultGrid').html(data);
 
+                        //show download
+                        $("#divResultButtons").show();
+
                         // disable loading spinner
                         $('#dtmLuiSpinner').hide();
 

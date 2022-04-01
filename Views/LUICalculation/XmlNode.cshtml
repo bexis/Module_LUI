@@ -1,0 +1,26 @@
+﻿@model System.Xml.XmlNode
+
+@{
+    ViewBag.Title = "XmlNode";
+}
+
+@if (Model.HasChildNodes == false)
+{
+    <p>@Model.InnerText</p>
+}
+else
+{
+    <p>
+        <b>
+            @if (@Model.Name.Contains("Type"))
+            {
+                <p style="background-color:#BEE1DA">@Model.Name.Replace("Type", "")</p>
+             }
+        </b>
+
+        @foreach (var item in Model.ChildNodes)
+        {
+            @Html.Partial("XmlNode", item);
+        }
+    </p>
+}

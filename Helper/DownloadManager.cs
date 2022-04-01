@@ -1,11 +1,10 @@
-﻿using BExIS.IO.Transform.Output;
+﻿using BExIS.Modules.Lui.UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Web;
+
 using Vaiona.Utils.Cfg;
 
 namespace BExIS.Modules.Lui.UI.Helper
@@ -35,6 +34,30 @@ namespace BExIS.Modules.Lui.UI.Helper
             }
 
             File.WriteAllText(path, data.ToString());
+            return path;
+        }
+
+        public string GenerateHtmlFile(string data, string filename)
+        {
+            string path = Path.Combine(AppConfiguration.DataPath, filename + ".html");
+            File.WriteAllText(path, data.ToString());
+            return path;
+        }
+
+        public string GernateMissingDataFile(List<MissingComponentData> missingComponentData, string filename)
+        {
+            StringBuilder missingData = new StringBuilder();
+            string path = Path.Combine(AppConfiguration.DataPath, filename + ".txt");
+            foreach(var m in missingComponentData)
+            {
+                missingData.AppendLine(m.Year);
+                foreach(var p in m.PlotIds)
+                {
+                    missingData.AppendLine(p);
+                }
+            }
+
+            File.WriteAllText(path, missingData.ToString());
             return path;
         }
 
@@ -84,13 +107,28 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             // modify if special characters are present
 
-            if (value.IndexOfAny(AsciiHelper.GetAllSeperator().ToArray()) != -1)
+            if (value.IndexOfAny(GetAllSeperator().ToArray()) != -1)
             {
                 value = "\"" + value.Replace("\"", "\"\"") + "\"";
             }
             return value;
         }
 
+        /// <summary>
+        /// Get all text seperators as char in a list
+        /// </summary>
+        /// <returns>List of char </returns>
+        public static List<char> GetAllSeperator()
+        {
+            List<char> allSeperatorsAsChar = new List<char>();
+
+            allSeperatorsAsChar.Add(',');
+            allSeperatorsAsChar.Add(';');
+            allSeperatorsAsChar.Add(' ');
+            allSeperatorsAsChar.Add('\t');
+
+            return allSeperatorsAsChar;
+        }
 
     }
 }

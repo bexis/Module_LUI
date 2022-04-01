@@ -1,0 +1,48 @@
+﻿@using BExIS.Modules.Lui.UI.Models
+@model ComponentDataModel
+
+<h3>LUI Compontents Calculation</h3>
+@Html.ActionLink("Calculate ", "CalculateCompontents", "LUIComponentCalculation", new { @class = "bx-button small function" })
+<br />
+<br />
+@if (Model.Data.Rows.Count > 0)
+{
+    <table id="compontentData">
+        <thead>
+            <tr>
+                @for (int c = 0; c < Model.Data.Columns.Count; c++)
+                {
+                    <th>
+                        @Model.Data.Columns[c].ColumnName
+                    </th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Data.Rows.Count; i++)
+            {
+                <tr>
+                    @for (int c = 0; c < Model.Data.Columns.Count; c++)
+                    {
+                        <td>
+                            @Model.Data.Rows[i][c].ToString()
+                        </td>
+                    }
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    <br />
+    @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
+
+
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#compontentData').DataTable();
+    });
+
+</script>
