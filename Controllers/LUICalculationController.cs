@@ -89,9 +89,16 @@ namespace BExIS.Modules.Lui.UI.Controllers
             Session["DataStructureId"] = null;
 
             if (model.ComponentsSet.SelectedValue == "old components set")
+            {
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
+                model.DownloadDatasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+            }
             else
+            {
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
+                model.DownloadDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+
+            }
 
             Session["DataStructureId"] = selectedDataStructureId;
 
