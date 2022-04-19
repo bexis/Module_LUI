@@ -18,6 +18,8 @@ using Ionic.Zip;
 using System.Xml;
 using System.Text;
 using BExIS.Utils.Extensions;
+using Vaiona.Web.Mvc.Modularity;
+using System.Web.Routing;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -172,9 +174,22 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
 
             //get metadata as html
-            XmlDocument xmlDocument = DataAccess.GetMetadata(model.DownloadDatasetId);
-            string htmlPage = PartialView("SimpleMetadata", xmlDocument).RenderToString();
-            string pathHtml = downloadManager.GenerateHtmlFile(htmlPage, model.DownloadDatasetId + "_metadata");
+            //XmlDocument xmlDocument = DataAccess.GetMetadata(model.DownloadDatasetId);
+
+            //string htmlPage = PartialView("SimpleMetadata", xmlDocument).RenderToString();
+            DatasetObject datasetObject = DataAccess.GetDatasetInfo(model.DownloadDatasetId);
+            var view = this.Render("DCM", "Form", "LoadMetadataOfflineVersion", new RouteValueDictionary()
+            {
+                { "entityId", long.Parse(model.DownloadDatasetId) },
+                { "title", "" },
+                { "metadatastructureId", long.Parse(datasetObject.MetadataStructureId) },
+                { "datastructureId", long.Parse(datasetObject.DataStructureId) },
+                { "researchplanId", null },
+                { "sessionKeyForMetadata", "ShowDataMetadata" },
+                { "resetTaskManager", false }
+            });
+
+            string pathHtml = downloadManager.GenerateHtmlFile(view.ToHtmlString(), model.DownloadDatasetId + "_metadata");
 
             //get missing data when relavent
             List<MissingComponentData> missingComponentData = DataAccess.GetMissingComponentData();
