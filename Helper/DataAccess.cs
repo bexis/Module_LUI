@@ -221,7 +221,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             DataTable compData = GetComponentData(datasetId);
 
             //get all years where data rows less then 50, that means not all plots has data
-            var years = compData.AsEnumerable().GroupBy(x => x.Field<DateTime>("Year")).Where(g => g.Count() < 50).ToList();
+            var years = compData.AsEnumerable().GroupBy(x => x.Field<DateTime>("Year")).Where(g => g.Count() < 150).ToList();
 
             foreach (var i in years)
             {
