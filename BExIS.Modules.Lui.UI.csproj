@@ -192,6 +192,7 @@
     <Compile Include="Helper\LUISeedDataGenerator.cs" />
     <Compile Include="Helper\Settings.cs" />
     <Compile Include="LUIModule.cs" />
+    <Compile Include="Models\ApiModels.cs" />
     <Compile Include="Models\ComponentDataModel.cs" />
     <Compile Include="Models\DataModel.cs" />
     <Compile Include="Models\LUIQueryModel.cs" />

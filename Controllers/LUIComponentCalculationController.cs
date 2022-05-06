@@ -80,5 +80,43 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             return File(storePath, MimeMapping.GetMimeMapping("ComponentData" + ".csv"), Path.GetFileName(storePath));
         }
+
+        public ActionResult UploadSelectedRows(int[] rowIds)
+        {
+            ComponentDataModel compData = Session["ComponentData"] as ComponentDataModel;
+
+            DataApiModel model = new DataApiModel();
+            model.DatasetId = (long)Models.Settings.get("lui:datasetNewComponentsSet");
+            model.DecimalCharacter = DecimalCharacter.point;
+
+            //get col names
+            List<string> cols = new List<string>();
+            foreach(DataColumn colum in compData.Data.Columns)
+            {
+                if (colum.ColumnName != "id")
+                    cols.Add(colum.ColumnName);
+            }
+
+            model.Columns = cols.ToArray();
+
+            string[,] dataArray = new string[rowIds.Count(), cols.Count];
+            List<string[]> dataArrays = new List<string[]>();
+            if (rowIds != null)
+            {
+                foreach (int id in rowIds)
+                {
+                    DataRow row = compData.Data.AsEnumerable().Where(a => a.Field<int>("id") == id).FirstOrDefault();
+                    string[] stringArray = row.ItemArray.Cast<string>().ToArray();
+                    dataArrays.Add(stringArray);
+                }
+
+                model.Data = dataArrays.ToArray();
+            }
+
+            //upload 
+            string result = DataAccess.Upload(model);
+
+            return Content(result);
+        }
     }
 }

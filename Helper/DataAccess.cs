@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Xml;
@@ -98,7 +99,7 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                         foreach (var r in records)
                         {
-                           
+
                             var l = Enumerable.ToList(r);
 
                             DataRow dr = data.NewRow();
@@ -110,7 +111,7 @@ namespace BExIS.Modules.Lui.UI.Helper
                                     dr[data.Columns[j].ColumnName] = DBNull.Value;
                                 else
                                     dr[data.Columns[j].ColumnName] = l[j].Value;
-                               
+
                             }
 
                             data.Rows.Add(dr);
@@ -128,20 +129,20 @@ namespace BExIS.Modules.Lui.UI.Helper
             {
                 string t = a;
             }
-        
+
 
             return data;
         }
 
 
-            /// <summary>
-            /// Get comp data
-            /// 
-            /// </summary>
-            /// <param name="datasetId"></param>
-            /// <returns>Data table with comp dataset depents on dataset id.</returns>
-            public static DataTable GetComponentData(string datasetId)
-            {
+        /// <summary>
+        /// Get comp data
+        /// 
+        /// </summary>
+        /// <param name="datasetId"></param>
+        /// <returns>Data table with comp dataset depents on dataset id.</returns>
+        public static DataTable GetComponentData(string datasetId)
+        {
             ServerInformation serverInformation = GetServerInformation();
 
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
@@ -149,6 +150,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
 
             DataTable compData = new DataTable();
+            compData.Columns.Add("Id");
             DataColumn year = new DataColumn("Year");
             year.DataType = System.Type.GetType("System.DateTime");
             compData.Columns.Add(year);
@@ -178,14 +180,17 @@ namespace BExIS.Modules.Lui.UI.Helper
                         string sep = "\t";
                         String[] row = new String[4];
                         int count = 0;
+                        int id = 0;
                         while ((line = reader.ReadLine()) != null)
                         {
                             count++;
+                            id++;
                             if (count > 1)
                             {
                                 row = line.Split(',');
                                 DataRow dr = compData.NewRow();
                                 //dr["Year"] = DateTime.Parse(row[0]).ToString("yyyy");
+                                dr["id"] = id;
                                 dr["Year"] = row[0];
                                 dr["Exploratory"] = row[1];
                                 dr["EP_PlotID"] = row[2];
@@ -242,7 +247,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// <returns>Information like version, title etc</returns>
         public static DatasetObject GetDatasetInfo(string datasetId)
         {
-            ServerInformation serverInformation =  GetServerInformation();
+            ServerInformation serverInformation = GetServerInformation();
             string link = serverInformation.ServerName + "/api/dataset/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
@@ -270,7 +275,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             return datasetObject;
         }
 
-        public static DataStructureObject GetDataStructure( long structId)
+        public static DataStructureObject GetDataStructure(long structId)
         {
             ServerInformation serverInformation = GetServerInformation();
             string link = serverInformation.ServerName + "/api/structures/" + structId;
@@ -362,80 +367,36 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             return graslandPlots;
         }
-    }
 
-
-
-    /// <summary>
-    /// Class to store server information to access data via API
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public class ServerInformation
-    {
-        public string ServerName { get; set; }
-        public string Token { get; set; }
-
-    }
-
-    /// <summary>
-    /// Class to store dataset information receive via api
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public class DataStructureObject
-    {
-        public string Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string inUse { get; set; }
-        public string Structured { get; set; }
-        public List<Variables> Variables { get; set; }
-    }
-
-    public class Variables
-    {
-        public string Id { get; set; }
-        public string Label { get; set; }
-        public string Description { get; set; }
-        public string isOptional { get; set; }
-        public string Unit { get; set; }
-        public string DataType { get; set; }
-        public string SystemType { get; set; }
-        public string AttributeName { get; set; }
-        public string AttributeDescription { get; set; }
-    }
-
-    /// <summary>
-    /// Class to store dataset information receive via api
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public class DatasetObject
-    {
-        public string Id { get; set; }
-        public string Version { get; set; }
-        public string VersionId { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string DataStructureId { get; set; }
-        public string MetadataStructureId { get; set; }
-        public AdditionalInformations AdditionalInformations { get; set; }
-        public DatasetObject()
+        public static string Upload(DataApiModel data)
         {
-            AdditionalInformations = new AdditionalInformations();
+            ServerInformation serverInformation = GetServerInformation();
+            string link = serverInformation.ServerName + "/api/Data/";
+            HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
+            //request.PreAuthenticate = true;
+            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+            {
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+                streamWriter.Write(json);
+            }
+
+            var httpResponse = (HttpWebResponse)request.GetResponse();
+            string result;
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                result = streamReader.ReadToEnd();
+            }
+
+            return result;
+
         }
     }
-   
 }
 
-/// <summary>
-/// Store AdditionalInformations for Dataset Object
-/// 
-/// </summary>
-/// <returns></returns>
-public class AdditionalInformations
-{
-    public string Title { get; set; }
 
-}
+
+    
