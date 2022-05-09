@@ -30,7 +30,7 @@
         <tbody>
             @for (int i = 0; i < Model.Data.Rows.Count; i++)
             {
-                <tr>
+                <tr id="@Model.Data.Rows[i]["Id"].ToString()">
                     <td></td>
                     @for (int c = 0; c < Model.Data.Columns.Count; c++)
                     {
@@ -45,8 +45,8 @@
     </table>
     <br />
     @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
-    <button onclick="upload()" class="bx-button function">Upload selected rows</button>
-    <p id="error"></p>
+    <button onclick="upload()" class="bx-button function">Upload selected rows</button><br />
+    <p id="error" style="font-weight:bold;"></p>
 
 }
 
@@ -68,8 +68,14 @@
     });
 
     function upload() {
-        var selectedIds = tbl.columns().checkboxes.selected()[0];
-        $.post('@Url.Action("Upload", "LUIComponentCalculation", new RouteValueDictionary { { "area", "RBM" } })', { rowIds: selectedIds }, function (data) {
+        var selectedIds = [];
+        $.each(tbl.rows('.selected').nodes(), function (i, item) {
+            selectedIds.push(item.id);
+            //var data = tbl.row(this).data();
+        });
+
+        console.log(selectedIds);
+        $.post('@Url.Action("UploadSelectedRows", "LUIComponentCalculation", new RouteValueDictionary { { "area", "LUI" } })', { rowIds: selectedIds }, function (data) {
             document.getElementById("error").textContent += data;
         });
     }

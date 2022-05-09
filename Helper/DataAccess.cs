@@ -150,7 +150,9 @@ namespace BExIS.Modules.Lui.UI.Helper
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
 
             DataTable compData = new DataTable();
-            compData.Columns.Add("Id");
+            DataColumn idCol = new DataColumn("Id");
+            idCol.DataType = System.Type.GetType("System.Int32");
+            compData.Columns.Add(idCol);
             DataColumn year = new DataColumn("Year");
             year.DataType = System.Type.GetType("System.DateTime");
             compData.Columns.Add(year);

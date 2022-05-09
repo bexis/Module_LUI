@@ -23,6 +23,10 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             //create result datatable
             DataTable luiComponents = new DataTable();
+            DataColumn idCol = new DataColumn("Id");
+            idCol.DataType = System.Type.GetType("System.Int32");
+            luiComponents.Columns.Add(idCol);
+
             luiComponents.Columns.Add("Year");
             luiComponents.Columns.Add("Exploratory");
             luiComponents.Columns.Add("EP_PlotID");
@@ -43,10 +47,12 @@ namespace BExIS.Modules.Lui.UI.Helper
             }
 
             #endregion
-
+            int idCounter = 0;
             foreach (DataRow row in landuseData.Rows)
             {
+                idCounter++;
                 DataRow dr = luiComponents.NewRow();
+                dr["Id"] = idCounter;
                 dr["Year"] = row.Field<DateTime>("Year").Year;
                 dr["Exploratory"] = row.Field<string>("Exploratory");
                 dr["EP_PlotID"] = row.Field<string>("EP_PlotID");
