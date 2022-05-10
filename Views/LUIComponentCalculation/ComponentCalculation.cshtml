@@ -18,7 +18,7 @@
     <table id="compontentData">
         <thead>
             <tr>
-                <th></th>
+                <th class="select-checkbox"><input id="checkBox" type="checkbox"></th>
                 @for (int c = 0; c < Model.Data.Columns.Count; c++)
                 {
                     <th>
@@ -67,12 +67,24 @@
         });
     });
 
+    //select or deselect all
+    $('#checkBox').on('click', function () {
+        if ($('#checkBox').is(':checked')) {
+            tbl.rows().select();
+        }
+        else {
+            tbl.rows().deselect();
+        }
+    });
+
+
     function upload() {
         var selectedIds = [];
         $.each(tbl.rows('.selected').nodes(), function (i, item) {
             selectedIds.push(item.id);
             //var data = tbl.row(this).data();
         });
+
 
         console.log(selectedIds);
         $.post('@Url.Action("UploadSelectedRows", "LUIComponentCalculation", new RouteValueDictionary { { "area", "LUI" } })', { rowIds: selectedIds }, function (data) {
