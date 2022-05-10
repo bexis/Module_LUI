@@ -20,6 +20,7 @@ using System.Text;
 using BExIS.Utils.Extensions;
 using Vaiona.Web.Mvc.Modularity;
 using System.Web.Routing;
+using Microsoft.AspNet.Identity;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -47,9 +48,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
                 //create model
                 LUIQueryModel model = new LUIQueryModel();
-                model.MissingComponentData = DataAccess.GetMissingComponentData();
+                model.MissingComponentData = DataAccess.GetMissingComponentData(GetServerInformation());
                 model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-                model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId).Version;
+                model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation()).Version;
                 return View("Index", model);
 
             } 
@@ -69,7 +70,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             Session["LUICalModel"] = lUIQueryModel;
 
             DataModel model = new DataModel();
-            model.Data = DataAccess.GetComponentData(datasetID.ToString());
+            model.Data = DataAccess.GetComponentData(datasetID.ToString(), GetServerInformation());
 
             return PartialView("_data", model);
         }
@@ -105,7 +106,19 @@ namespace BExIS.Modules.Lui.UI.Controllers
             Session["DataStructureId"] = selectedDataStructureId;
 
             // do the calucaltion
-            var results = CalculateLui.DoCalc(model);
+            // source data
+            string dsId = "";
+            switch (model.ComponentsSet.SelectedValue)
+            {
+                case "old components set":
+                    dsId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+                    break;
+                case "new components set":
+                    dsId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                    break;
+            }
+            DataTable dt_sourceData = DataAccess.GetComponentData(dsId, GetServerInformation());
+            var results = CalculateLui.DoCalc(model, dt_sourceData);
 
             DataModel dataModel = new DataModel();
             dataModel.Data = results;
@@ -142,7 +155,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
             
             if (model.RawVsCalc.SelectedValue == "unstandardized")
-              downloadData  = DataAccess.GetComponentData(model.DownloadDatasetId);
+              downloadData  = DataAccess.GetComponentData(model.DownloadDatasetId, GetServerInformation());
             else
                 downloadData = Session[SESSION_TABLE] as DataTable;
 
@@ -177,7 +190,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             //XmlDocument xmlDocument = DataAccess.GetMetadata(model.DownloadDatasetId);
 
             //string htmlPage = PartialView("SimpleMetadata", xmlDocument).RenderToString();
-            DatasetObject datasetObject = DataAccess.GetDatasetInfo(model.DownloadDatasetId);
+            DatasetObject datasetObject = DataAccess.GetDatasetInfo(model.DownloadDatasetId, GetServerInformation());
             var view = this.Render("DCM", "Form", "LoadMetadataOfflineVersion", new RouteValueDictionary()
             {
                 { "entityId", long.Parse(model.DownloadDatasetId) },
@@ -192,11 +205,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string pathHtml = downloadManager.GenerateHtmlFile(view.ToHtmlString(), model.DownloadDatasetId + "_metadata");
 
             //get missing data when relavent
-            List<MissingComponentData> missingComponentData = DataAccess.GetMissingComponentData();
+            List<MissingComponentData> missingComponentData = DataAccess.GetMissingComponentData(GetServerInformation());
             string pathMissingData = "";
             if (missingComponentData.Count > 0)
             {
-                string version = DataAccess.GetDatasetInfo(model.DownloadDatasetId).Version;
+                string version = DataAccess.GetDatasetInfo(model.DownloadDatasetId, GetServerInformation()).Version;
                 string filenameMissingdata = model.DownloadDatasetId + "_" + "Version_" + version + "_" + "MissingComponentData";
                 pathMissingData = downloadManager.GernateMissingDataFile(missingComponentData, filenameMissingdata);
             }
@@ -269,7 +282,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             else
                 datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
 
-            string version = DataAccess.GetDatasetInfo(datasetId).Version; 
+            string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version; 
 
             string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was downloaded by <b>" + user + "</b>";
             es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
@@ -300,7 +313,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // check for LUI new dataset
             bool exists = false;
             string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-            var dataNew = DataAccess.GetComponentData(luiIdNew);
+            var dataNew = DataAccess.GetComponentData(luiIdNew, GetServerInformation());
             if (dataNew.Rows.Count == 0)
                 return exists == false;
 
@@ -308,7 +321,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // check for LUI old dataset
             string luiIdOld = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
-            var dataOld = DataAccess.GetComponentData(luiIdOld);
+            var dataOld = DataAccess.GetComponentData(luiIdOld, GetServerInformation());
             if (dataOld.Rows.Count == 0)
                 return exists == false;
 
@@ -316,6 +329,45 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // if we came that far, all conditions are met
             return true;
+        }
+
+        /// <summary>
+        /// Get current server und user information
+        /// </summary>
+        /// <returns></returns>
+        public ServerInformation GetServerInformation()
+        {
+            //string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), "Credentials.json");
+            //string text = System.IO.File.ReadAllText(filePath);
+            ServerInformation serverInformation = new ServerInformation();
+            var uri = System.Web.HttpContext.Current.Request.Url;
+            serverInformation.ServerName = uri.GetLeftPart(UriPartial.Authority);
+            serverInformation.Token = GetUserToken();
+
+
+            return serverInformation;
+        }
+        private string GetUserToken()
+        {
+            var identityUserService = new IdentityUserService();
+            var userManager = new UserManager();
+
+            try
+            {
+                long userId = 0;
+                long.TryParse(this.User.Identity.GetUserId(), out userId);
+
+                var user = identityUserService.FindById(userId);
+
+                user = identityUserService.FindById(userId);
+                var token = userManager.GetTokenAsync(user).Result;
+                return token;
+            }
+            finally
+            {
+                identityUserService.Dispose();
+                userManager.Dispose();
+            }
         }
     }
 

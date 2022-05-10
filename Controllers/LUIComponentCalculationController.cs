@@ -1,5 +1,7 @@
 ﻿using BExIS.Modules.Lui.UI.Helper;
 using BExIS.Modules.Lui.UI.Models;
+using BExIS.Security.Services.Subjects;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -27,9 +29,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
             Session["ComponentData"] = null;
             string datasetId = Models.Settings.get("lui:lanuDataset").ToString();
             //get data structureId
-            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId).DataStructureId, CultureInfo.InvariantCulture);
+            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
 
-            DataTable lanuFullData = DataAccess.GetData(datasetId, structureId);
+            DataTable lanuFullData = DataAccess.GetData(datasetId, structureId, GetServerInformation());
 
             //get only last year
             var lastYear = lanuFullData.AsEnumerable().Select(a => a.Field<DateTime>("Year")).Distinct().ToList().Max();
@@ -39,8 +41,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
             //get plottype infos
             string datasetIdPlots = Models.Settings.get("lui:epPlotsDataset").ToString();
             //get data structureId
-            long structureIdPlots = long.Parse(DataAccess.GetDatasetInfo(datasetIdPlots).DataStructureId, CultureInfo.InvariantCulture);
-            DataTable plotTypes = DataAccess.GetData(datasetIdPlots, structureIdPlots);
+            long structureIdPlots = long.Parse(DataAccess.GetDatasetInfo(datasetIdPlots, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+            DataTable plotTypes = DataAccess.GetData(datasetIdPlots, structureIdPlots, GetServerInformation());
 
             LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(lanuData, lanuFullData, plotTypes);
             DataTable compData = lUIComponentsCalculation.CalculateComponents();
@@ -139,17 +141,57 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 }
 
                 //upload 
-               result = DataAccess.Upload(model);
+               result = DataAccess.Upload(model, GetServerInformation());
             }
 
             return Content(result);
+        }
+
+        private string GetUserToken()
+        {
+            var identityUserService = new IdentityUserService();
+            var userManager = new UserManager();
+
+            try
+            {
+                long userId = 0;
+                long.TryParse(this.User.Identity.GetUserId(), out userId);
+
+                var user = identityUserService.FindById(userId);
+
+                user = identityUserService.FindById(userId);
+                var token = userManager.GetTokenAsync(user).Result;
+                return token;
+            }
+            finally
+            {
+                identityUserService.Dispose();
+                userManager.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Get server information form json file in workspace
+        /// </summary>
+        /// <returns></returns>
+        public  ServerInformation GetServerInformation()
+        {
+            //string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), "Credentials.json");
+            //string text = System.IO.File.ReadAllText(filePath);
+            ServerInformation serverInformation = new ServerInformation();
+            var uri = System.Web.HttpContext.Current.Request.Url;
+            serverInformation.ServerName = uri.GetLeftPart(UriPartial.Authority) + "/";
+            serverInformation.Token = GetUserToken();
+
+
+            return serverInformation;
         }
 
 
         private int[] CheckDuplicates(DataTable newCompData, int[] rowIds)
         {
             string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-            DataTable allCompData = DataAccess.GetComponentData(luiIdNew);
+            DataTable allCompData = DataAccess.GetComponentData(luiIdNew, GetServerInformation());
 
             List<int> noDuplicates = new List<int>();
             foreach (int id in rowIds)

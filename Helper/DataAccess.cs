@@ -19,28 +19,14 @@ namespace BExIS.Modules.Lui.UI.Helper
 {
     public class DataAccess
     {
-        /// <summary>
-        /// Get server information form json file in workspace
-        /// </summary>
-        /// <returns></returns>
-        public static ServerInformation GetServerInformation()
-        {
-            string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), "Credentials.json");
-            string text = System.IO.File.ReadAllText(filePath);
-            ServerInformation serverInformation = Newtonsoft.Json.JsonConvert.DeserializeObject<ServerInformation>(text);
-
-            return serverInformation;
-        }
-
+       
         /// <summary>
         /// Get metadata
         /// </summary>
         /// <param name="datasetId"></param>
         /// <returns>metadata from a dataset as xml document.</returns>
-        public static XmlDocument GetMetadata(string datasetId)
+        public static XmlDocument GetMetadata(string datasetId, ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
-
             string link = serverInformation.ServerName + "/api/metadata/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
@@ -64,16 +50,14 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// </summary>
         /// <param name="datasetId"></param>
         /// <returns>Data table with comp dataset depents on dataset id.</returns>
-        public static DataTable GetData(string datasetId, long structureId)
+        public static DataTable GetData(string datasetId, long structureId, ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
-
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
             // request.ContentType = "application/json";
 
-            DataStructureObject dataStructureObject = GetDataStructure(structureId);
+            DataStructureObject dataStructureObject = GetDataStructure(structureId, serverInformation);
 
             DataTable data = new DataTable();
             foreach (var variable in dataStructureObject.Variables)
@@ -141,10 +125,8 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// </summary>
         /// <param name="datasetId"></param>
         /// <returns>Data table with comp dataset depents on dataset id.</returns>
-        public static DataTable GetComponentData(string datasetId)
+        public static DataTable GetComponentData(string datasetId, ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
-
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
@@ -221,11 +203,11 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// 
         /// </summary>
         /// <returns>List of missing component data. Years with missing ep plotids.</returns>
-        public static List<MissingComponentData> GetMissingComponentData()
+        public static List<MissingComponentData> GetMissingComponentData(ServerInformation serverInformation)
         {
             List<MissingComponentData> data = new List<MissingComponentData>();
             string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-            DataTable compData = GetComponentData(datasetId);
+            DataTable compData = GetComponentData(datasetId, serverInformation);
 
             //get all years where data rows less then 50, that means not all plots has data
             var years = compData.AsEnumerable().GroupBy(x => x.Field<DateTime>("Year")).Where(g => g.Count() < 150).ToList();
@@ -235,7 +217,7 @@ namespace BExIS.Modules.Lui.UI.Helper
                 MissingComponentData missingComponentData = new MissingComponentData();
                 missingComponentData.Year = i.Select(a => a.Field<DateTime>("Year")).FirstOrDefault().ToString("yyyy");
                 List<string> availablePlots = compData.AsEnumerable().Where(x => x.Field<DateTime>("Year").ToString("yyyy") == missingComponentData.Year).Select(a => a.Field<string>("EP_PlotID")).ToList();
-                missingComponentData.PlotIds = getAllGrasslandPlots().Except(availablePlots).ToList();
+                missingComponentData.PlotIds = getAllGrasslandPlots(serverInformation).Except(availablePlots).ToList();
                 data.Add(missingComponentData);
             }
 
@@ -247,9 +229,8 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// 
         /// </summary>
         /// <returns>Information like version, title etc</returns>
-        public static DatasetObject GetDatasetInfo(string datasetId)
+        public static DatasetObject GetDatasetInfo(string datasetId, ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
             string link = serverInformation.ServerName + "/api/dataset/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
@@ -277,9 +258,8 @@ namespace BExIS.Modules.Lui.UI.Helper
             return datasetObject;
         }
 
-        public static DataStructureObject GetDataStructure(long structId)
+        public static DataStructureObject GetDataStructure(long structId, ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
             string link = serverInformation.ServerName + "/api/structures/" + structId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
@@ -315,9 +295,8 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// 
         /// </summary>
         /// <returns>list of grasland ep plot ids</returns>
-        public static List<string> getAllGrasslandPlots()
+        public static List<string> getAllGrasslandPlots(ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
             string datasetId = Models.Settings.get("lui:epPlotsDataset").ToString();
 
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
@@ -370,9 +349,8 @@ namespace BExIS.Modules.Lui.UI.Helper
             return graslandPlots;
         }
 
-        public static string Upload(DataApiModel data)
+        public static string Upload(DataApiModel data, ServerInformation serverInformation)
         {
-            ServerInformation serverInformation = GetServerInformation();
             string link = serverInformation.ServerName + "/api/Data/";
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             //request.PreAuthenticate = true;

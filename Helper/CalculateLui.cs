@@ -15,25 +15,12 @@ namespace BExIS.Modules.Lui.UI.Models
             New
         };
 
-        public static DataTable DoCalc(LUIQueryModel model)
+        public static DataTable DoCalc(LUIQueryModel model, DataTable dt_sourceData)
         {
             // -----------------------------------------------------------------------------------------
             // initiate some neede variables
             //
             //
-
-            // source data
-            string dsId = "";
-            switch (model.ComponentsSet.SelectedValue)
-            {
-                case "old components set":
-                    dsId = Settings.get("lui:datasetOldComponentsSet").ToString();
-                    break;
-                case "new components set":
-                    dsId = Settings.get("lui:datasetNewComponentsSet").ToString();
-                    break;
-            }
-            DataTable dt_sourceData = DataAccess.GetComponentData(dsId);
 
             // result data
             DataTable dt_rslts = MakeResultsDT();
