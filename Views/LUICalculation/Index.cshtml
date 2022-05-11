@@ -31,23 +31,23 @@
                         else
                         {
                             <div class="box">
-                               Source Dataset: @Model.NewComponentsSetDatasetId<br />
+                                <b>Source Dataset:</b> @Model.NewComponentsSetDatasetId<br />
                             </div>
                             <div class="box">
-                                Version: @Model.NewComponentsSetDatasetVersion
+                                <b>Version:</b> @Model.NewComponentsSetDatasetVersion
                             </div>
                             <div class="box">
-                               Last update: 
+                                <b>Last update:</b> @Model.NewComponentsSetLastUpdate 
                             </div>
                             <br /><br />
                             foreach (var missingCompData in Model.MissingComponentData)
                             {
 
                                 <div class="box">
-                                    Year: @missingCompData.Year<br />
+                                    <b>Year:</b> @missingCompData.Year<br />
                                 </div>
                                 <div class="box">
-                                    Missing plots: <a class="plotClick">Click to show</a>
+                                    <b>Missing plots:</b><br /><a class="plotClick">Click to show</a>
                                 </div>
                                 <div class="plots">
                                     @foreach (var plot in missingCompData.PlotIds)

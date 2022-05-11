@@ -50,7 +50,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 LUIQueryModel model = new LUIQueryModel();
                 model.MissingComponentData = DataAccess.GetMissingComponentData(GetServerInformation());
                 model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                var datasetInfo = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation());
                 model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation()).Version;
+                XmlDocument doc =  DataAccess.GetMetadata(model.NewComponentsSetDatasetId, GetServerInformation());
+                model.NewComponentsSetLastUpdate = DateTime.Parse(doc.GetElementsByTagName("metadataLastModificationDateType")[0].InnerText).ToString("yyyy-MM-dd");
+
                 return View("Index", model);
 
             } 
