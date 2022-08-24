@@ -7,18 +7,17 @@
     /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Setup XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
     const $dataEl = $('#divQuery0'),
-    datasetIdOld = $dataEl.data('datasetidold'),
+        datasetIdOld = $dataEl.data('datasetidold'),
         datasetIdNew = $dataEl.data('datasetidnew'),
-        versionIdOld = $dataEl.data('versionidold'),
-        versionIdNew = $dataEl.data('versionidnew'),
-        showdataUrl = $dataEl.data('showdataurl');
+        showdataUrl = $dataEl.data('showdataurl'),
+        isPublic = $dataEl.data('ispublic');
 
-        console.log($dataEl.data());
 
     /* XXXXXXXXXXXXXXXXXXXXXXXXXX Event Handlers XXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
     var datasetId = datasetIdNew;
-    var versionId= versionIdNew;
+    console.log(isPublic);
+    var isPublicAccess = isPublic.toLowerCase();
 
     /* ------------------------------ Query 00 ------------------------------ */
 
@@ -75,12 +74,14 @@
                 // show complete dataset and leave wizzard steps hidden
                 $('#divResultGrid').empty();
                 $('#dtmLuiSpinner').show();
+                console.log(isPublicAccess);
                 $.ajax({
                     method: 'get',
                     url: showdataUrl,
                     data: {
                         datasetID: datasetId,
-                        versionId: versionId
+                        isPublicAccess: isPublicAccess
+
                     }
                 })
                     .done(function (data) {

@@ -18,18 +18,19 @@
             @Html.ActionLink("How to reference", "DownloadPDF", new { fileName = "LUI-citation.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             @Html.ActionLink("How to use the tool", "DownloadPDF", new { fileName = "HowToPlusDiagram.pdf" }, new { @class = "bx-button small function", target = "_blank" })
             @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @if (Model.MissingComponentData.Count() != 0)
+            @if (Model.MissingComponentData.Count() != 0 && Model.IsPublicAccess == false)
             {
                 <div class="dtm-divBox">
                     <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
 
                     <div class="dtm-controls">
-                        @if (Model.MissingComponentData.Count() == 0)
-                        {
-                            <div>No warnings.</div>
-                        }
-                        else
-                        {
+
+                            @if (Model.MissingComponentData.Count() == 0)
+                            {
+                                <div>No warnings.</div>
+                            }
+                            else
+                            {
                             <div class="box">
                                 <b>Source Dataset:</b> @Model.NewComponentsSetDatasetId<br />
                             </div>
@@ -57,7 +58,8 @@
                                 </div>
 
                             }
-                        }
+                            }
+                        
                     </div>
                     
                     <br />
@@ -81,6 +83,7 @@
                 <div id="divQuery0" class="dtm-divBox"
                      data-datasetidOld="@Settings.get("lui:datasetOldComponentsSet")"
                      data-datasetidNew="@Settings.get("lui:datasetNewComponentsSet")"
+                     data-isPublic="@Model.IsPublicAccess"
                      data-showdataurl="@Url.Action("ShowPrimaryData", "LUICalculation", new { Area = "LUI" })">
                     <p class="dtm-para_green">Please select if you want to extract the raw data (unstandardized) OR if you want to calculate the LUI (standardized).</p>
                     <div class="dtm-controls">

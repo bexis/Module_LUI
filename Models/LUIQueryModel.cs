@@ -28,6 +28,8 @@ namespace BExIS.Modules.Lui.UI.Models
 
         public string NewComponentsSetLastUpdate { get; set; }
 
+        public bool IsPublicAccess { get; set; }
+
 
         public LUIQueryModel()
         {
@@ -39,6 +41,8 @@ namespace BExIS.Modules.Lui.UI.Models
             TypeOfMean = new RadioButtonControlHelper();
             Plotlevel = new RadioButtonControlHelper();
             ComponentsSet = new RadioButtonControlHelper();
+
+            IsPublicAccess = false;
 
             MissingComponentData = new List<MissingComponentData>();
 

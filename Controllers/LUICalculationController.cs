@@ -46,9 +46,21 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 // set page title
                 ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
+
                 //create model
                 LUIQueryModel model = new LUIQueryModel();
                 model.MissingComponentData = DataAccess.GetMissingComponentData(GetServerInformation());
+
+                //check if public access
+                long.TryParse(this.User.Identity.GetUserId(), out long userId);
+
+                //no bexis user == public access and id uncomplete data exsits
+                if(userId == 0 && model.MissingComponentData.Count() > 0)
+                {
+                    model.IsPublicAccess = true;
+                }
+
+              
                 model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
                 var datasetInfo = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation());
                 model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation()).Version;
@@ -66,7 +78,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
         }
 
-        public ActionResult ShowPrimaryData(long datasetID)
+        public ActionResult ShowPrimaryData(long datasetID, bool isPublicAccess)
         {
             LUIQueryModel lUIQueryModel = new LUIQueryModel();
             lUIQueryModel.RawVsCalc.SelectedValue = "unstandardized";
@@ -74,7 +86,23 @@ namespace BExIS.Modules.Lui.UI.Controllers
             Session["LUICalModel"] = lUIQueryModel;
 
             DataModel model = new DataModel();
-            model.Data = DataAccess.GetComponentData(datasetID.ToString(), GetServerInformation());
+            DataTable data = DataAccess.GetComponentData(datasetID.ToString(), GetServerInformation());
+            if (isPublicAccess)
+            {
+                //remove not complete years data for non public access
+                var missingData = DataAccess.GetMissingComponentData(GetServerInformation());
+                if (missingData.Count > 0)
+                {
+                    List<string> incompleteYears = missingData.Select(x => x.Year).Distinct().ToList();
+                    RemoveNotComplateYears(data, incompleteYears);
+                    model.Data = data;
+
+                }
+                else
+                    model.Data = data;
+            }
+            else
+                model.Data = data;
 
             return PartialView("_data", model);
         }
@@ -122,6 +150,18 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     break;
             }
             DataTable dt_sourceData = DataAccess.GetComponentData(dsId, GetServerInformation());
+            if(model.IsPublicAccess)
+            {
+                //remove not complete years data for non public access
+                var missingData = DataAccess.GetMissingComponentData(GetServerInformation());
+                if (missingData.Count > 0)
+                {
+                    List<string> incompleteYears = missingData.Select(x => x.Year).Distinct().ToList();
+                    RemoveNotComplateYears(dt_sourceData, incompleteYears);
+                }
+               
+            }
+
             var results = CalculateLui.DoCalc(model, dt_sourceData);
 
             DataModel dataModel = new DataModel();
@@ -361,6 +401,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 long userId = 0;
                 long.TryParse(this.User.Identity.GetUserId(), out userId);
 
+                if(userId==0)
+                    return "";
+
                 var user = identityUserService.FindById(userId);
 
                 user = identityUserService.FindById(userId);
@@ -371,6 +414,15 @@ namespace BExIS.Modules.Lui.UI.Controllers
             {
                 identityUserService.Dispose();
                 userManager.Dispose();
+            }
+        }
+
+        private void RemoveNotComplateYears(DataTable data, List<string> years)
+        {
+            foreach (var year in years)
+            {
+                data.AsEnumerable().Where(r => r.Field<DateTime>("Year").ToString("yyyy") == year).ToList().ForEach(row => row.Delete());
+                data.AcceptChanges();
             }
         }
     }
