@@ -13,10 +13,13 @@
         isPublic = $dataEl.data('ispublic');
 
 
+    $("#yearsOld").hide();
+    $("#yearsNew").show();
+
+
     /* XXXXXXXXXXXXXXXXXXXXXXXXXX Event Handlers XXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
     var datasetId = datasetIdNew;
-    console.log(isPublic);
     var isPublicAccess = isPublic.toLowerCase();
 
     /* ------------------------------ Query 00 ------------------------------ */
@@ -39,15 +42,17 @@
             console.log(selecteddataset);
 
             if (selecteddataset == "old components set") {
-                
-                datasetId = datasetIdOld ;
-                versionId = versionIdOld;
+
+                datasetId = datasetIdOld;
+                console.log("old");
+                $("#yearsOld").show();
+                $("#yearsNew").hide();
             }
             else {
                 datasetId = datasetIdNew;
-                versionId = versionIdNew;
+                $("#yearsNew").show();
+                $("#yearsOld").hide();
             }
-
 
         });
 
@@ -69,12 +74,12 @@
                 resetQuery1();
                 $('#divQuery1').show();
                 $('#divResultGrid').empty();
+
             }
             else {
                 // show complete dataset and leave wizzard steps hidden
                 $('#divResultGrid').empty();
                 $('#dtmLuiSpinner').show();
-                console.log(isPublicAccess);
                 $.ajax({
                     method: 'get',
                     url: showdataUrl,
@@ -188,7 +193,7 @@
                     return;
                 }
             }
-            if ($("input[id^='Years']:checked").length < 1) {
+            if ($("input[id^='AvailableYearsOldComp']:checked").length < 1 && $("input[id^='AvailableYearsNewComp']:checked").length < 1) {
                 $('#errYears').show();
                 return;
             }

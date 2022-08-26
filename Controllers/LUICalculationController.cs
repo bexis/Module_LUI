@@ -60,12 +60,14 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     model.IsPublicAccess = true;
                 }
 
-              
                 model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
                 var datasetInfo = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation());
                 model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation()).Version;
                 XmlDocument doc =  DataAccess.GetMetadata(model.NewComponentsSetDatasetId, GetServerInformation());
                 model.NewComponentsSetLastUpdate = DateTime.Parse(doc.GetElementsByTagName("metadataLastModificationDateType")[0].InnerText).ToString("yyyy-MM-dd");
+
+                model.AvailableYearsNewComp = GetAvailableYears(model.NewComponentsSetDatasetId, model.IsPublicAccess);
+                model.AvailableYearsOldComp = GetAvailableYears(Models.Settings.get("lui:datasetOldComponentsSet").ToString(), model.IsPublicAccess);
 
                 return View("Index", model);
 
@@ -150,18 +152,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     break;
             }
             DataTable dt_sourceData = DataAccess.GetComponentData(dsId, GetServerInformation());
-            if(model.IsPublicAccess)
-            {
-                //remove not complete years data for non public access
-                var missingData = DataAccess.GetMissingComponentData(GetServerInformation());
-                if (missingData.Count > 0)
-                {
-                    List<string> incompleteYears = missingData.Select(x => x.Year).Distinct().ToList();
-                    RemoveNotComplateYears(dt_sourceData, incompleteYears);
-                }
-               
-            }
-
+            
             var results = CalculateLui.DoCalc(model, dt_sourceData);
 
             DataModel dataModel = new DataModel();
@@ -391,6 +382,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             return serverInformation;
         }
+        /// <summary>
+        /// Get bexis token from logged-in user
+        /// </summary>
+        /// <returns></returns>
         private string GetUserToken()
         {
             var identityUserService = new IdentityUserService();
@@ -417,6 +412,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
         }
 
+        /// <summary>
+        /// Remove data for not complete uploaded years
+        /// </summary>
+        /// <returns></returns>
         private void RemoveNotComplateYears(DataTable data, List<string> years)
         {
             foreach (var year in years)
@@ -424,6 +423,33 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 data.AsEnumerable().Where(r => r.Field<DateTime>("Year").ToString("yyyy") == year).ToList().ForEach(row => row.Delete());
                 data.AcceptChanges();
             }
+        }
+
+        /// <summary>
+        /// Get distinct available years from comp data
+        /// </summary>
+        /// <returns>List of years</returns>
+        private List<CheckboxControlHelper> GetAvailableYears(string datasetId, bool isPublicAccess)
+        {
+            DataTable data = DataAccess.GetComponentData(datasetId, GetServerInformation());
+            if (isPublicAccess)
+            {
+                var missingData = DataAccess.GetMissingComponentData(GetServerInformation());
+                if (missingData.Count > 0)
+                {
+                    List<string> incompleteYears = missingData.Select(x => x.Year).Distinct().ToList();
+                    RemoveNotComplateYears(data, incompleteYears);
+                }
+            }
+
+            var years = data.AsEnumerable().Select(r => r.Field<DateTime>("Year").ToString("yyyy")).ToList();
+            List<CheckboxControlHelper> yearList = new List<CheckboxControlHelper>();
+            years = years.Distinct().ToList();
+            foreach(string year in years)
+            {
+                yearList.Add(new CheckboxControlHelper { Name = year, Checked = false });
+            }
+            return yearList;
         }
     }
 

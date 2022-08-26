@@ -11,14 +11,20 @@ namespace BExIS.Modules.Lui.UI.Models
         public RadioButtonControlHelper RawVsCalc { get; set; }
         public RadioButtonControlHelper Scales { get; set; }
         public List<CheckboxControlHelper> Explos { get; set; }
-        public List<CheckboxControlHelper> Years { get; set; }
+        //public List<CheckboxControlHelper> Years { get; set; }
         public RadioButtonControlHelper TypeOfMean { get; set; }
         public RadioButtonControlHelper Plotlevel { get; set; }
+
         //public CalculateLui.ComponentsSet ComponentsSet { get; set; }
 
         public RadioButtonControlHelper ComponentsSet { get; set; }
 
         public List<MissingComponentData> MissingComponentData { get; set; }
+
+        public List<CheckboxControlHelper> AvailableYearsNewComp { get; set; }
+
+        public List<CheckboxControlHelper> AvailableYearsOldComp { get; set; }
+
 
         public string NewComponentsSetDatasetId { get; set; }
 
@@ -37,10 +43,12 @@ namespace BExIS.Modules.Lui.UI.Models
             RawVsCalc = new RadioButtonControlHelper();
             Scales = new RadioButtonControlHelper();
             Explos = new List<CheckboxControlHelper>();
-            Years = new List<CheckboxControlHelper>();
             TypeOfMean = new RadioButtonControlHelper();
             Plotlevel = new RadioButtonControlHelper();
             ComponentsSet = new RadioButtonControlHelper();
+            AvailableYearsNewComp = new List<CheckboxControlHelper>();
+            AvailableYearsOldComp = new List<CheckboxControlHelper>();
+
 
             IsPublicAccess = false;
 
@@ -65,13 +73,13 @@ namespace BExIS.Modules.Lui.UI.Models
             Explos.Add(new CheckboxControlHelper { Name = "SCH", Checked = false });
 
             // fill Years          
-            int fromYear = (int)Settings.get("lui:years:min");
-            int toYear = (int)Settings.get("lui:years:max");
-            for (int i = fromYear; i <= toYear; i++)
-            {
-                Years.Add(new CheckboxControlHelper { Name = i.ToString(), Checked = false });
+            //int fromYear = (int)Settings.get("lui:years:min");
+            //int toYear = (int)Settings.get("lui:years:max");
+            //for (int i = fromYear; i <= toYear; i++)
+            //{
+            //    Years.Add(new CheckboxControlHelper { Name = i.ToString(), Checked = false });
 
-            }
+            //}
 
             // fill TypeOfMeans
             TypeOfMean.SelectedValue = "empty";

@@ -150,16 +150,30 @@
                     <br />
 
                     <div id="divQuery2_2" class="dtm-controls">
-                        @for (int i = 0; i < Model.Years.Count(); i++)
-                        {
-                            <span style="flex-grow: 0">
-                                <label>
-                                    @Html.CheckBoxFor(m => m.Years[i].Checked, new { @class = "cb_years" })
-                                    @Html.DisplayFor(m => m.Years[i].Name)
-                                    @Html.HiddenFor(m => m.Years[i].Name)
-                                </label>
-                            </span>
-                        }
+                        <div id="yearsOld">
+                            @for (int i = 0; i < Model.AvailableYearsOldComp.Count(); i++)
+                            {
+                                <span style="flex-grow: 0">
+                                    <label>
+                                        @Html.CheckBoxFor(m => m.AvailableYearsOldComp[i].Checked, new { @class = "cb_years" })
+                                        @Html.DisplayFor(m => m.AvailableYearsOldComp[i].Name)
+                                        @Html.HiddenFor(m => m.AvailableYearsOldComp[i].Name)
+                                    </label>
+                                </span>
+                            }
+                            </div>
+                            <div id="yearsNew" v>
+                            @for (int i = 0; i < Model.AvailableYearsNewComp.Count(); i++)
+                            {
+                                <span style="flex-grow: 0">
+                                    <label>
+                                        @Html.CheckBoxFor(m => m.AvailableYearsNewComp[i].Checked, new { @class = "cb_years" })
+                                        @Html.DisplayFor(m => m.AvailableYearsNewComp[i].Name)
+                                        @Html.HiddenFor(m => m.AvailableYearsNewComp[i].Name)
+                                    </label>
+                                </span>
+                            }
+                            </div>
                     </div>
 
                     <div class="dtm-message dtm-para_green" id="dtmLocationMessages"><div data-location="ALB">@Settings.get("lui:msg:alb")</div><div data-location="HAI">@Settings.get("lui:msg:hai")</div><div data-location="SCH">@Settings.get("lui:msg:sch")</div></div>
