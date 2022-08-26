@@ -10,20 +10,22 @@
                     "CalculateLUI",
                     "CalculateLUI",
                     new AjaxOptions { HttpMethod = "POST", UpdateTargetId = "divResultGrid", OnBegin = "$('#divResultButtons').hide(); $('#divResultGrid').empty(); $('#dtmLuiSpinner').show(); $('html, body').animate({ scrollTop: 0 }, 'slow');", OnSuccess = "$('#divResultButtons').show(); $('#dtmLuiSpinner').hide();resetAllTelerikIconTitles();" },
-                    new { @autocomplete= "off" })
+                    new { @autocomplete = "off" })
                )
         {
-        <td style="width: 600px; vertical-align:top;">
+            @Html.HiddenFor(m => m.IsPublicAccess)
 
-            @Html.ActionLink("How to reference", "DownloadPDF", new { fileName = "LUI-citation.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @Html.ActionLink("How to use the tool", "DownloadPDF", new { fileName = "HowToPlusDiagram.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
-            @if (Model.MissingComponentData.Count() != 0 && Model.IsPublicAccess == false)
-            {
-                <div class="dtm-divBox">
-                    <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
+            <td style="width: 600px; vertical-align:top;">
 
-                    <div class="dtm-controls">
+                @Html.ActionLink("How to reference", "DownloadPDF", new { fileName = "LUI-citation.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+                @Html.ActionLink("How to use the tool", "DownloadPDF", new { fileName = "HowToPlusDiagram.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+                @Html.ActionLink("LUI changes docu", "DownloadPDF", new { fileName = "LuiChangesInfo.pdf" }, new { @class = "bx-button small function", target = "_blank" })
+                @if (Model.MissingComponentData.Count() != 0 && Model.IsPublicAccess == false)
+                {
+                    <div class="dtm-divBox">
+                        <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
+
+                        <div class="dtm-controls">
 
                             @if (Model.MissingComponentData.Count() == 0)
                             {
@@ -31,40 +33,40 @@
                             }
                             else
                             {
-                            <div class="box">
-                                <b>Source Dataset:</b> @Model.NewComponentsSetDatasetId<br />
-                            </div>
-                            <div class="box">
-                                <b>Version:</b> @Model.NewComponentsSetDatasetVersion
-                            </div>
-                            <div class="box">
-                                <b>Last update:</b> @Model.NewComponentsSetLastUpdate 
-                            </div>
-                            <br /><br />
-                            foreach (var missingCompData in Model.MissingComponentData)
-                            {
-
                                 <div class="box">
-                                    <b>Year:</b> @missingCompData.Year<br />
+                                    <b>Source Dataset:</b> @Model.NewComponentsSetDatasetId<br />
                                 </div>
                                 <div class="box">
-                                    <b>Missing plots:</b><br /><a class="plotClick">Click to show</a>
+                                    <b>Version:</b> @Model.NewComponentsSetDatasetVersion
                                 </div>
-                                <div class="plots">
-                                    @foreach (var plot in missingCompData.PlotIds)
-                                    {
-                                        @plot<br />
-                                    }
+                                <div class="box">
+                                    <b>Last update:</b> @Model.NewComponentsSetLastUpdate
                                 </div>
+                                <br /><br />
+                                foreach (var missingCompData in Model.MissingComponentData)
+                                {
 
+                                    <div class="box">
+                                        <b>Year:</b> @missingCompData.Year<br />
+                                    </div>
+                                    <div class="box">
+                                        <b>Missing plots:</b><br /><a class="plotClick">Click to show</a>
+                                    </div>
+                                    <div class="plots">
+                                        @foreach (var plot in missingCompData.PlotIds)
+                                        {
+                                            @plot<br />
+                                        }
+                                    </div>
+
+                                }
                             }
-                            }
-                        
+
+                        </div>
+
+                        <br />
                     </div>
-                    
-                    <br />
-                </div>
-            }
+                }
                 <div id="divQuery00" class="dtm-divBox">
                     <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
                     <div class="dtm-controls">
@@ -161,8 +163,8 @@
                                     </label>
                                 </span>
                             }
-                            </div>
-                            <div id="yearsNew" v>
+                        </div>
+                        <div id="yearsNew" v>
                             @for (int i = 0; i < Model.AvailableYearsNewComp.Count(); i++)
                             {
                                 <span style="flex-grow: 0">
@@ -173,7 +175,7 @@
                                     </label>
                                 </span>
                             }
-                            </div>
+                        </div>
                     </div>
 
                     <div class="dtm-message dtm-para_green" id="dtmLocationMessages"><div data-location="ALB">@Settings.get("lui:msg:alb")</div><div data-location="HAI">@Settings.get("lui:msg:hai")</div><div data-location="SCH">@Settings.get("lui:msg:sch")</div></div>
@@ -218,7 +220,8 @@
         <td style="vertical-align:top;">
             <div id="divResultButtons" style="display:none"
                  data-prepurl="@Url.Action("PrepareDownloadFile", "LUICalculation")"
-                 data-downloadurl="@Url.Action("DownloadFile", "LUICalculation")">
+                 data-downloadurl="@Url.Action("DownloadFile", "LUICalculation")"
+                 data-isPublic="@Model.IsPublicAccess">
                 <button type="button" class="dtm-download bx-button function" data-download="text/csv">Download (zip)</button>
                 @*<button type="button" class="dtm-download bx-button function" data-download="text/tsv">Download Tab Separated</button>*@
             </div>

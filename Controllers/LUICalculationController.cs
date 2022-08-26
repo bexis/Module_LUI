@@ -85,6 +85,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             LUIQueryModel lUIQueryModel = new LUIQueryModel();
             lUIQueryModel.RawVsCalc.SelectedValue = "unstandardized";
             lUIQueryModel.DownloadDatasetId = datasetID.ToString();
+            lUIQueryModel.IsPublicAccess = isPublicAccess; 
             Session["LUICalModel"] = lUIQueryModel;
 
             DataModel model = new DataModel();
@@ -306,11 +307,21 @@ namespace BExIS.Modules.Lui.UI.Controllers
             //send mail
             var es = new EmailService();
             string user;
-            using (UserManager userManager = new UserManager())
-            {
-                user = userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
-            }
+
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
+
+            if (model.IsPublicAccess)
+            {
+                user = "public downloaded";
+            }
+            else
+            {
+                using (UserManager userManager = new UserManager())
+                {
+                    user = "downloaded by " + userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
+                }
+            }
+
             string datasetId;
             if (model.ComponentsSet.SelectedValue.Contains("old"))
                 datasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
@@ -319,7 +330,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version; 
 
-            string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was downloaded by <b>" + user + "</b>";
+            string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was  <b>" + user + "</b>";
             es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
 
 
