@@ -23,7 +23,7 @@
                 @if (Model.MissingComponentData.Count() != 0 && Model.IsPublicAccess == false)
                 {
                     <div class="dtm-divBox">
-                        <p class="dtm-para_green">Warning: Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
+                        <p class="dtm-para-warning"><b>Warning:</b> Some input data needed for calculation is not completely available. Below you will find the affected years, and for which plots the data is missing. For this year, use the LUI just for testing purposes. For publications, use only LUI where no warning is given.</p>
 
                         <div class="dtm-controls">
 
@@ -68,7 +68,7 @@
                     </div>
                 }
                 <div id="divQuery00" class="dtm-divBox">
-                    <p class="dtm-para_green">Which input data do you want to use for the calculation (default = new set).</p>
+                    <p class="dtm-para_green">Which input data do you want to use for the calculation. See "LUI changes docu" above for more information.</p>
                     <div class="dtm-controls">
                         @foreach (var item in Model.ComponentsSet.Values)
                         {

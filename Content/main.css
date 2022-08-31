@@ -6,13 +6,20 @@
     margin-bottom: 1em;
 }
 
+
 .dtm-para_green {
     background-color: #bbddd9;
     font-size: 14px;
     padding: 0.5em;
 }
 
-.dtm-divBox .dtm-controls {
+.dtm-para-warning {
+    background-color: #FFE6BE;
+    font-size: 14px;
+    padding: 0.5em;
+}
+
+.dtm-divBox .dtm-controls  {
     display: flex;
     flex-wrap: wrap;
     padding: 0.1em 0.5em;

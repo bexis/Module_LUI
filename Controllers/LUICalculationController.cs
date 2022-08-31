@@ -126,7 +126,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             Session["DataStructureId"] = null;
 
-            if (model.ComponentsSet.SelectedValue == "old components set")
+            if (model.ComponentsSet.SelectedValue == "historic components set")
             {
                 selectedDataStructureId = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
                 model.DownloadDatasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
@@ -145,10 +145,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string dsId = "";
             switch (model.ComponentsSet.SelectedValue)
             {
-                case "old components set":
+                case "historic components set":
                     dsId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
                     break;
-                case "new components set":
+                case "default components set":
                     dsId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
                     break;
             }
@@ -323,7 +323,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
             }
 
             string datasetId;
-            if (model.ComponentsSet.SelectedValue.Contains("old"))
+            if (model.ComponentsSet.SelectedValue.Contains("historic"))
                 datasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
             else
                 datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();

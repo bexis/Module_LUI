@@ -55,8 +55,8 @@ namespace BExIS.Modules.Lui.UI.Models
             MissingComponentData = new List<MissingComponentData>();
 
             //fill ComponentsSet
-            ComponentsSet.SelectedValue = "new components set";
-            ComponentsSet.Values = new List<string>() { "old components set", "new components set" };
+            ComponentsSet.SelectedValue = "default components set";
+            ComponentsSet.Values = new List<string>() { "historic components set", "default components set" };
 
 
             // fill RawVsCalc
