@@ -50,14 +50,23 @@
                                         <b>Year:</b> @missingCompData.Year<br />
                                     </div>
                                     <div class="box">
-                                        <b>Missing plots:</b><br /><a class="plotClick">Click to show</a>
-                                    </div>
-                                    <div class="plots">
-                                        @foreach (var plot in missingCompData.PlotIds)
+                                        <b>Plot coverage:</b><br />
+                                        @foreach(var percentage in missingCompData.ExploPercentage)
                                         {
-                                            @plot<br />
+                                            <div>@percentage.Key : @percentage.Value</div>
                                         }
+
                                     </div>
+                                    <div class="box">
+                                        <b>Missing plots:</b><br /><a class="plotClick">Click to show</a><br />
+                                        <div class="plots">
+                                            @foreach (var plot in missingCompData.PlotIds)
+                                            {
+                                                @plot<br />
+                                            }
+                                        </div>
+                                    </div>
+                                    
 
                                 }
                             }

@@ -109,9 +109,14 @@ namespace BExIS.Modules.Lui.UI.Models
 
         public List<string> PlotIds { get; set; }
 
+        public Dictionary<string, string> ExploPercentage { get; set; }
+
+
+
         public MissingComponentData()
         {
             PlotIds = new List<string>();
+            ExploPercentage = new Dictionary<string, string>();
         }
 
     }

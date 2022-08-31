@@ -217,6 +217,20 @@ namespace BExIS.Modules.Lui.UI.Helper
                 MissingComponentData missingComponentData = new MissingComponentData();
                 missingComponentData.Year = i.Select(a => a.Field<DateTime>("Year")).FirstOrDefault().ToString("yyyy");
                 List<string> availablePlots = compData.AsEnumerable().Where(x => x.Field<DateTime>("Year").ToString("yyyy") == missingComponentData.Year).Select(a => a.Field<string>("EP_PlotID")).ToList();
+                
+                //
+                int numberPlotsH = availablePlots.Where(a => a.Contains("H")).Count();
+                int numberPlotsS = availablePlots.Where(a => a.Contains("S")).Count();
+                int numberPlotsA = availablePlots.Where(a => a.Contains("A")).Count();
+
+                double pHai = (numberPlotsH * 100) / 50;
+                double pSch = (numberPlotsS * 100) / 50;
+                double pAlb = (numberPlotsA * 100) / 50;
+
+                missingComponentData.ExploPercentage.Add("ALB",pAlb.ToString() + "%");
+                missingComponentData.ExploPercentage.Add("HAI", pHai.ToString() + "%");
+                missingComponentData.ExploPercentage.Add("SCH", pSch.ToString() + "%");
+
                 missingComponentData.PlotIds = getAllGrasslandPlots(serverInformation).Except(availablePlots).ToList();
                 data.Add(missingComponentData);
             }
