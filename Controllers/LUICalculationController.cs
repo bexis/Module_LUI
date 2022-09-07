@@ -55,7 +55,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 long.TryParse(this.User.Identity.GetUserId(), out long userId);
 
                 //no bexis user == public access and id uncomplete data exsits
-                if(userId == 0 && model.MissingComponentData.Count() > 0)
+                if(userId == 0)
                 {
                     model.IsPublicAccess = true;
                 }
