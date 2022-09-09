@@ -46,7 +46,7 @@
     <br />
     @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
     <button onclick="upload()" class="bx-button function">Upload selected rows</button><br />
-    <p id="error" style="font-weight:bold;"></p>
+    <div id="error" style="font-weight:bold;"></div>
 
 }
 
@@ -80,15 +80,14 @@
 
     function upload() {
         var selectedIds = [];
+        document.getElementById("error").textContent = "";
         $.each(tbl.rows('.selected').nodes(), function (i, item) {
             selectedIds.push(item.id);
             //var data = tbl.row(this).data();
         });
 
-
-        console.log(selectedIds);
         $.post('@Url.Action("UploadSelectedRows", "LUIComponentCalculation", new RouteValueDictionary { { "area", "LUI" } })', { rowIds: selectedIds }, function (data) {
-            document.getElementById("error").textContent += data;
+            document.getElementById("error").innerHTML = data;
         });
     }
 

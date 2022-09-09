@@ -85,63 +85,88 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         public ActionResult UploadSelectedRows(int[] rowIds)
         {
-            ComponentDataModel compData = Session["ComponentData"] as ComponentDataModel;
-
-            //check for dublicates
-            int[] noDuplicateIds = CheckDuplicates(compData.Data, rowIds);
-
             string result = "";
-
-            if (noDuplicateIds.Length == 0)
+            if (rowIds != null)
             {
-                result = "No Upload: all selected rows are already uploaded!";
+                ComponentDataModel compData = Session["ComponentData"] as ComponentDataModel;
+
+                //check for dublicates
+                int[] duplicateIds = CheckDuplicates(compData.Data, rowIds);
+
+                if (duplicateIds.Length == rowIds.Length)
+                {
+                    result = "No Upload: all selected rows are already uploaded!";
+                }
+                else
+                {
+                    //get duplicated ids for result text
+                    //var dups = rowIds.Except(noDuplicateIds);
+                    if (duplicateIds.Length > 0)
+                    {
+                        result += "Duplicated ids not uploaded: ";
+                        foreach (int d in duplicateIds)
+                        {
+                            if(duplicateIds.Last() == d)
+                                result += d.ToString() + " ";
+                            else
+                                result += d.ToString() + ", ";
+                        }
+
+                        result += "<br/>";
+                    }
+
+
+                    DataApiModel model = new DataApiModel();
+                    model.DatasetId = Convert.ToInt64(Models.Settings.get("lui:datasetNewComponentsSet"));
+                    model.DecimalCharacter = DecimalCharacter.point;
+
+                    //get col names
+                    List<string> cols = new List<string>();
+                    foreach (DataColumn colum in compData.Data.Columns)
+                    {
+                        if (colum.ColumnName != "Id")
+                            cols.Add(colum.ColumnName);
+                    }
+
+                    model.Columns = cols.ToArray();
+
+                    string[,] dataArray = new string[rowIds.Count(), cols.Count];
+
+                        List<string[]> dataArrays = new List<string[]>();
+
+                        //get all not duplicated id
+                        var idsToUpload = rowIds.Except(duplicateIds);
+                        if(idsToUpload.Count() > 0)
+                            result += "Uploaded Ids: ";
+
+                        foreach (int id in idsToUpload)
+                        {
+                            DataTable copy = new DataTable();
+                            copy = compData.Data.Copy();
+
+                            DataRow row = copy.AsEnumerable().Where(a => a.Field<int>("Id") == id).FirstOrDefault();
+                            row.Table.Columns.Remove("Id");
+
+                            string[] stringArray = row.ItemArray.Cast<string>().ToArray();
+                            dataArrays.Add(stringArray);
+
+                            if (idsToUpload.Last() == id)
+                                result += id.ToString() + " ";
+                            else
+                                result += id.ToString() + ", ";
+                        }
+                    result += "<br/>";
+
+                        model.Data = dataArrays.ToArray();
+
+                        //upload 
+                        result += "API response: " + DataAccess.Upload(model, GetServerInformation()) + "<br/>";
+                    
+                }
             }
             else
             {
-                //get duplicated ids for result text
-                var dups = rowIds.Except(noDuplicateIds);
-                result += "Duplicated ids not uploaded: <br>";
-                foreach (int d in dups)
-                {
-                    result += d.ToString() + "<br>";
-                }
-
-                DataApiModel model = new DataApiModel();
-                model.DatasetId = Convert.ToInt64(Models.Settings.get("lui:datasetNewComponentsSet"));
-                model.DecimalCharacter = DecimalCharacter.point;
-
-                //get col names
-                List<string> cols = new List<string>();
-                foreach (DataColumn colum in compData.Data.Columns)
-                {
-                    if (colum.ColumnName != "Id")
-                        cols.Add(colum.ColumnName);
-                }
-
-                model.Columns = cols.ToArray();
-
-                string[,] dataArray = new string[rowIds.Count(), cols.Count];
-
-                List<string[]> dataArrays = new List<string[]>();
-                if (rowIds != null)
-                {
-                    foreach (int id in noDuplicateIds)
-                    {
-                        DataTable copy = new DataTable();
-                        copy = compData.Data.Copy();
-
-                        DataRow row = copy.AsEnumerable().Where(a => a.Field<int>("Id") == id).FirstOrDefault();
-                        row.Table.Columns.Remove("Id");
-
-                        string[] stringArray = row.ItemArray.Cast<string>().ToArray();
-                        dataArrays.Add(stringArray);
-                    }
-
-                    model.Data = dataArrays.ToArray();
-                }
-
-                //upload 
-               result = DataAccess.Upload(model, GetServerInformation());
+                result += "No Upload: no rows selected.";
             }
 
             return Content(result);
@@ -193,17 +218,19 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
             DataTable allCompData = DataAccess.GetComponentData(luiIdNew, GetServerInformation());
 
-            List<int> noDuplicates = new List<int>();
+            List<int> duplicates = new List<int>();
             foreach (int id in rowIds)
             {
                 var row = newCompData.AsEnumerable().Where(a => a.Field<int>("Id") == id).FirstOrDefault();
-                var duplicate = allCompData.AsEnumerable().Where(c=>c.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID") && c.Field<DateTime>("Year").ToString("yyyy") == row.Field<string>("Year")).First();
-                if (duplicate == null)
-                    noDuplicates.Add(id);
+                var duplicate = allCompData.AsEnumerable().Where(c=>c.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID") && c.Field<DateTime>("Year").ToString("yyyy") == row.Field<string>(1)).FirstOrDefault();
+                if (duplicate != null)
+                 duplicates.Add(id);
+
+                    
 
             }
 
-            return noDuplicates.ToArray();
+            return duplicates.ToArray();
         }
     }
 }
