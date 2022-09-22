@@ -216,7 +216,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private int[] CheckDuplicates(DataTable newCompData, int[] rowIds)
         {
             string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-            DataTable allCompData = DataAccess.GetComponentData(luiIdNew, GetServerInformation());
+            long structureId = long.Parse(DataAccess.GetDatasetInfo(luiIdNew, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+
+            DataTable allCompData = DataAccess.GetData(luiIdNew, structureId, GetServerInformation());
 
             List<int> duplicates = new List<int>();
             foreach (int id in rowIds)

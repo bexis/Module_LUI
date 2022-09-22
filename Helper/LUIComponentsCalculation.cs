@@ -222,6 +222,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         private void DataCorrections()
         {
             //Interpolate missing data of fertilization -> not needed because the case is very rare
+
            var slurryNAs = landuseData.AsEnumerable().Where(r => r.Field<double>("Slurry_m3ha") == -999999 && r.Field<string>("TypeSlurry") == "999999");
 
             foreach(var row in slurryNAs)

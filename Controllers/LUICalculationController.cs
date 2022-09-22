@@ -21,6 +21,7 @@ using BExIS.Utils.Extensions;
 using Vaiona.Web.Mvc.Modularity;
 using System.Web.Routing;
 using Microsoft.AspNet.Identity;
+using System.Globalization;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -89,7 +90,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
             Session["LUICalModel"] = lUIQueryModel;
 
             DataModel model = new DataModel();
-            DataTable data = DataAccess.GetComponentData(datasetID.ToString(), GetServerInformation());
+            //get data structureId
+            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetID.ToString(), GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+            DataTable data = DataAccess.GetData(datasetID.ToString(), structureId, GetServerInformation());
             if (isPublicAccess)
             {
                 //remove not complete years data for non public access
@@ -152,7 +155,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     dsId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
                     break;
             }
-            DataTable dt_sourceData = DataAccess.GetComponentData(dsId, GetServerInformation());
+
+            long structureId = long.Parse(DataAccess.GetDatasetInfo(dsId, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+            DataTable dt_sourceData = DataAccess.GetData(dsId, structureId, GetServerInformation());
             
             var results = CalculateLui.DoCalc(model, dt_sourceData);
 
@@ -189,9 +194,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
             DataTable downloadData = new DataTable();
 
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
-            
+
             if (model.RawVsCalc.SelectedValue == "unstandardized")
-              downloadData  = DataAccess.GetComponentData(model.DownloadDatasetId, GetServerInformation());
+            {
+                long structureId = long.Parse(DataAccess.GetDatasetInfo(model.DownloadDatasetId, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+                downloadData = DataAccess.GetData(model.DownloadDatasetId, structureId, GetServerInformation());
+            }
             else
                 downloadData = Session[SESSION_TABLE] as DataTable;
 
@@ -263,8 +271,6 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 zip.Save(zipFilePath);
             }
 
-
-
             // store path in session for further download
             if (null == Session[SESSION_FILE])
             {
@@ -273,10 +279,6 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType] = zipFilePath;
 
-
-
-
-            
             return Json(new { error = false, mimeType = mimeType }, JsonRequestBehavior.AllowGet);
         }
 
@@ -358,20 +360,31 @@ namespace BExIS.Modules.Lui.UI.Controllers
         {
             // check for LUI new dataset
             bool exists = false;
-            string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-            var dataNew = DataAccess.GetComponentData(luiIdNew, GetServerInformation());
-            if (dataNew.Rows.Count == 0)
-                return exists == false;
+            try
+            {
+                string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
 
-            string dsdId = Models.Settings.get("lui:datastructureNewComponentsSet").ToString();
+                long structureIdNew = long.Parse(DataAccess.GetDatasetInfo(luiIdNew, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+                var dataNew = DataAccess.GetData(luiIdNew, structureIdNew, GetServerInformation());
+                if (dataNew.Rows.Count == 0)
+                    return exists == false;
 
-            // check for LUI old dataset
-            string luiIdOld = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
-            var dataOld = DataAccess.GetComponentData(luiIdOld, GetServerInformation());
-            if (dataOld.Rows.Count == 0)
-                return exists == false;
+                string dsdId = Models.Settings.get("lui:datastructureNewComponentsSet").ToString();
 
-            int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
+                // check for LUI old dataset
+                string luiIdOld = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+                long structureIdOld = long.Parse(DataAccess.GetDatasetInfo(luiIdNew, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+
+                var dataOld = DataAccess.GetData(luiIdOld, structureIdOld, GetServerInformation());
+                if (dataOld.Rows.Count == 0)
+                    return exists == false;
+
+                int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
+            }
+            catch(Exception e)
+            {
+                throw new Exception("Precondion failed: ",e);
+            }
 
             // if we came that far, all conditions are met
             return true;
@@ -442,7 +455,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns>List of years</returns>
         private List<CheckboxControlHelper> GetAvailableYears(string datasetId, bool isPublicAccess)
         {
-            DataTable data = DataAccess.GetComponentData(datasetId, GetServerInformation());
+            //get data structureId
+            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId.ToString(), GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
+            DataTable data = DataAccess.GetData(datasetId, structureId, GetServerInformation());
             if (isPublicAccess)
             {
                 var missingData = DataAccess.GetMissingComponentData(GetServerInformation());

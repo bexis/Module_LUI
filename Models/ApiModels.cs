@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 
@@ -64,6 +65,29 @@ namespace BExIS.Modules.Lui.UI.Models
         {
             AdditionalInformations = new AdditionalInformations();
         }
+    }
+
+    /// <summary>
+    /// Class to store Data Statistic information receive via api
+    /// </summary>
+    /// <returns></returns>
+    public class ApiDataStatisticModel
+    {
+        public long VariableId { get; set; }
+        public string VariableName { get; set; }
+        public string VariableDescription { get; set; }
+        public string DataTypeName { get; set; }
+        public string DataTypeSystemType { get; set; }
+        public string DataTypeDisplayPattern { get; set; }
+        public string Unit { get; set; }
+        public DataTable uniqueValues { get; set; }
+        public string count { get; set; }
+        public string max { get; set; }
+        public string min { get; set; }
+        public string maxLength { get; set; }
+        public string minLength { get; set; }
+        public DataTable missingValues { get; set; }
+
     }
 
 
