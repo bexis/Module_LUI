@@ -162,9 +162,10 @@
 
                     <div id="divQuery2_2" class="dtm-controls">
                         <div id="yearsOld">
+
                             @for (int i = 0; i < Model.AvailableYearsOldComp.Count(); i++)
                             {
-                                <span style="flex-grow: 0">
+                                <span style=" padding-left: 20px; padding-right: 20px;">
                                     <label>
                                         @Html.CheckBoxFor(m => m.AvailableYearsOldComp[i].Checked, new { @class = "cb_years" })
                                         @Html.DisplayFor(m => m.AvailableYearsOldComp[i].Name)
@@ -176,7 +177,7 @@
                         <div id="yearsNew">
                             @for (int i = 0; i < Model.AvailableYearsNewComp.Count(); i++)
                             {
-                                <span style="flex-grow: 0">
+                                <span style="padding-left: 20px; padding-right: 20px;">
                                     <label>
                                         @Html.CheckBoxFor(m => m.AvailableYearsNewComp[i].Checked, new { @class = "cb_years" })
                                         @Html.DisplayFor(m => m.AvailableYearsNewComp[i].Name)
