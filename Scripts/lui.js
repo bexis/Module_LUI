@@ -7,18 +7,20 @@
     /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Setup XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
     const $dataEl = $('#divQuery0'),
-    datasetIdOld = $dataEl.data('datasetidold'),
+        datasetIdOld = $dataEl.data('datasetidold'),
         datasetIdNew = $dataEl.data('datasetidnew'),
-        versionIdOld = $dataEl.data('versionidold'),
-        versionIdNew = $dataEl.data('versionidnew'),
-        showdataUrl = $dataEl.data('showdataurl');
+        showdataUrl = $dataEl.data('showdataurl'),
+        isPublic = $dataEl.data('ispublic');
 
-        console.log($dataEl.data());
+
+    $("#yearsOld").hide();
+    $("#yearsNew").show();
+
 
     /* XXXXXXXXXXXXXXXXXXXXXXXXXX Event Handlers XXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
     var datasetId = datasetIdNew;
-    var versionId= versionIdNew;
+    var isPublicAccess = isPublic.toLowerCase();
 
     /* ------------------------------ Query 00 ------------------------------ */
 
@@ -39,16 +41,18 @@
             console.log(datasetIdOld);
             console.log(selecteddataset);
 
-            if (selecteddataset == "old components set") {
-                
-                datasetId = datasetIdOld ;
-                versionId = versionIdOld;
+            if (selecteddataset == "historic components set") {
+
+                datasetId = datasetIdOld;
+                console.log("old");
+                $("#yearsOld").show();
+                $("#yearsNew").hide();
             }
             else {
                 datasetId = datasetIdNew;
-                versionId = versionIdNew;
+                $("#yearsNew").show();
+                $("#yearsOld").hide();
             }
-
 
         });
 
@@ -70,6 +74,7 @@
                 resetQuery1();
                 $('#divQuery1').show();
                 $('#divResultGrid').empty();
+
             }
             else {
                 // show complete dataset and leave wizzard steps hidden
@@ -80,7 +85,8 @@
                     url: showdataUrl,
                     data: {
                         datasetID: datasetId,
-                        versionId: versionId
+                        isPublicAccess: isPublicAccess
+
                     }
                 })
                     .done(function (data) {
@@ -187,7 +193,7 @@
                     return;
                 }
             }
-            if ($("input[id^='Years']:checked").length < 1) {
+            if ($("input[id^='AvailableYearsOldComp']:checked").length < 1 && $("input[id^='AvailableYearsNewComp']:checked").length < 1) {
                 $('#errYears').show();
                 return;
             }

@@ -1,6 +1,14 @@
 ﻿@using BExIS.Modules.Lui.UI.Models
 @model ComponentDataModel
 
+@section scripts
+{
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.4/css/select.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.3.4/js/dataTables.select.min.js"></script>
+}
+
 <h3>LUI Compontents Calculation</h3>
 @Html.ActionLink("Calculate ", "CalculateCompontents", "LUIComponentCalculation", new { @class = "bx-button small function" })
 <br />
@@ -10,6 +18,7 @@
     <table id="compontentData">
         <thead>
             <tr>
+                <th class="select-checkbox"><input id="checkBox" type="checkbox"></th>
                 @for (int c = 0; c < Model.Data.Columns.Count; c++)
                 {
                     <th>
@@ -21,7 +30,8 @@
         <tbody>
             @for (int i = 0; i < Model.Data.Rows.Count; i++)
             {
-                <tr>
+                <tr id="@Model.Data.Rows[i]["Id"].ToString()">
+                    <td></td>
                     @for (int c = 0; c < Model.Data.Columns.Count; c++)
                     {
                         <td>
@@ -35,14 +45,50 @@
     </table>
     <br />
     @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
-
+    <button onclick="upload()" class="bx-button function">Upload selected rows</button><br />
+    <div id="error" style="font-weight:bold;"></div>
 
 }
 
 <script type="text/javascript">
-
+    var tbl;
     $(document).ready(function () {
-        $('#compontentData').DataTable();
+        tbl = $('#compontentData').DataTable({
+            columnDefs: [{
+                orderable: false,
+                className: 'select-checkbox',
+                targets: 0
+            }],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },
+            order: [[1, 'asc']]
+        });
     });
+
+    //select or deselect all
+    $('#checkBox').on('click', function () {
+        if ($('#checkBox').is(':checked')) {
+            tbl.rows().select();
+        }
+        else {
+            tbl.rows().deselect();
+        }
+    });
+
+
+    function upload() {
+        var selectedIds = [];
+        document.getElementById("error").textContent = "";
+        $.each(tbl.rows('.selected').nodes(), function (i, item) {
+            selectedIds.push(item.id);
+            //var data = tbl.row(this).data();
+        });
+
+        $.post('@Url.Action("UploadSelectedRows", "LUIComponentCalculation", new RouteValueDictionary { { "area", "LUI" } })', { rowIds: selectedIds }, function (data) {
+            document.getElementById("error").innerHTML = data;
+        });
+    }
 
 </script>
