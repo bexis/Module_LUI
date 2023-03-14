@@ -235,6 +235,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             //string htmlPage = PartialView("SimpleMetadata", xmlDocument).RenderToString();
             DatasetObject datasetObject = DataAccess.GetDatasetInfo(model.DownloadDatasetId, GetServerInformation());
+            Session["ShowDataMetadata"] = null;
             var view = this.Render("DCM", "Form", "LoadMetadataOfflineVersion", new RouteValueDictionary()
             {
                 { "entityId", long.Parse(model.DownloadDatasetId) },
