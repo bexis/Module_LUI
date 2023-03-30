@@ -466,22 +466,22 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns>List of years</returns>
         private List<CheckboxControlHelper> GetAvailableYears(string datasetId, bool isPublicAccess)
         {
-            //get data structureId
-            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId.ToString(), GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
-            DataTable data = DataAccess.GetData(datasetId, structureId, GetServerInformation());
+
+            List<ApiDataStatisticModel> statisticModels = DataAccess.GetStatistic(datasetId, GetServerInformation());
+            DataTable yearsTable = statisticModels.Where(a => a.VariableName == "Year").Select(c => c.uniqueValues).FirstOrDefault();
+
+            var inComYears = yearsTable.AsEnumerable().Where(a => a.Field<long>("count").ToString() != "150").Select(c=>c.Field<DateTime>("var").ToString("yyyy")).ToList();
+            var years = yearsTable.AsEnumerable().Select(r => r.Field<DateTime>("var").ToString("yyyy")).ToList();
+
             if (isPublicAccess)
             {
-                var missingData = DataAccess.GetMissingComponentData(GetServerInformation());
-                if (missingData.Count > 0)
+                if (inComYears.Count > 0)
                 {
-                    List<string> incompleteYears = missingData.Select(x => x.Year).Distinct().ToList();
-                    RemoveNotComplateYears(data, incompleteYears);
+                  years = years.Except(inComYears).ToList();
                 }
             }
 
-            var years = data.AsEnumerable().Select(r => r.Field<DateTime>("Year").ToString("yyyy")).ToList();
             List<CheckboxControlHelper> yearList = new List<CheckboxControlHelper>();
-            years = years.Distinct().ToList();
             foreach(string year in years)
             {
                 yearList.Add(new CheckboxControlHelper { Name = year, Checked = false });
