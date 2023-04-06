@@ -50,7 +50,20 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
                 //create model
                 LUIQueryModel model = new LUIQueryModel();
-                model.MissingComponentData = DataAccess.GetMissingComponentData(GetServerInformation());
+                bool dataMissing = false;
+                string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                List<ApiDataStatisticModel> statisticModels = DataAccess.GetStatistic(datasetId, GetServerInformation());
+                DataTable years = statisticModels.Where(a => a.VariableName == "Year").Select(c => c.uniqueValues).FirstOrDefault();
+                foreach(DataRow dataRow in years.Rows)
+                {
+                    if (dataRow["count"].ToString() != "150")
+                        dataMissing = true;
+                }
+
+                if (dataMissing)
+                    model.MissingComponentData = DataAccess.GetMissingComponentData(GetServerInformation());
+                else
+                    model.MissingComponentData = new List<MissingComponentData>();
 
                 //check if public access
                 long.TryParse(this.User.Identity.GetUserId(), out long userId);
@@ -235,6 +248,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             //string htmlPage = PartialView("SimpleMetadata", xmlDocument).RenderToString();
             DatasetObject datasetObject = DataAccess.GetDatasetInfo(model.DownloadDatasetId, GetServerInformation());
+            Session["ShowDataMetadata"] = null;
             var view = this.Render("DCM", "Form", "LoadMetadataOfflineVersion", new RouteValueDictionary()
             {
                 { "entityId", long.Parse(model.DownloadDatasetId) },
@@ -363,23 +377,20 @@ namespace BExIS.Modules.Lui.UI.Controllers
             try
             {
                 string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-
-                long structureIdNew = long.Parse(DataAccess.GetDatasetInfo(luiIdNew, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
-                var dataNew = DataAccess.GetData(luiIdNew, structureIdNew, GetServerInformation());
-                if (dataNew.Rows.Count == 0)
+                List<ApiDataStatisticModel> statisticsNew = DataAccess.GetStatistic(luiIdNew, GetServerInformation());
+                var countNew = statisticsNew.Select(a => a.count).FirstOrDefault();
+                if(countNew == "0")
                     return exists == false;
 
-                string dsdId = Models.Settings.get("lui:datastructureNewComponentsSet").ToString();
 
                 // check for LUI old dataset
                 string luiIdOld = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
-                long structureIdOld = long.Parse(DataAccess.GetDatasetInfo(luiIdNew, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
-
-                var dataOld = DataAccess.GetData(luiIdOld, structureIdOld, GetServerInformation());
-                if (dataOld.Rows.Count == 0)
+                List<ApiDataStatisticModel> statisticsOld = DataAccess.GetStatistic(luiIdOld, GetServerInformation());
+                var countOld = statisticsOld.Select(a => a.count).FirstOrDefault();
+                if (countOld == "0")
                     return exists == false;
 
-                int dsdIdOld = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
+
             }
             catch(Exception e)
             {
@@ -455,22 +466,22 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns>List of years</returns>
         private List<CheckboxControlHelper> GetAvailableYears(string datasetId, bool isPublicAccess)
         {
-            //get data structureId
-            long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId.ToString(), GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
-            DataTable data = DataAccess.GetData(datasetId, structureId, GetServerInformation());
+
+            List<ApiDataStatisticModel> statisticModels = DataAccess.GetStatistic(datasetId, GetServerInformation());
+            DataTable yearsTable = statisticModels.Where(a => a.VariableName == "Year").Select(c => c.uniqueValues).FirstOrDefault();
+
+            var inComYears = yearsTable.AsEnumerable().Where(a => a.Field<long>("count").ToString() != "150").Select(c=>c.Field<DateTime>("var").ToString("yyyy")).ToList();
+            var years = yearsTable.AsEnumerable().Select(r => r.Field<DateTime>("var").ToString("yyyy")).ToList();
+
             if (isPublicAccess)
             {
-                var missingData = DataAccess.GetMissingComponentData(GetServerInformation());
-                if (missingData.Count > 0)
+                if (inComYears.Count > 0)
                 {
-                    List<string> incompleteYears = missingData.Select(x => x.Year).Distinct().ToList();
-                    RemoveNotComplateYears(data, incompleteYears);
+                  years = years.Except(inComYears).ToList();
                 }
             }
 
-            var years = data.AsEnumerable().Select(r => r.Field<DateTime>("Year").ToString("yyyy")).ToList();
             List<CheckboxControlHelper> yearList = new List<CheckboxControlHelper>();
-            years = years.Distinct().ToList();
             foreach(string year in years)
             {
                 yearList.Add(new CheckboxControlHelper { Name = year, Checked = false });

@@ -177,7 +177,7 @@
                         <div id="yearsNew">
                             @for (int i = 0; i < Model.AvailableYearsNewComp.Count(); i++)
                             {
-                                <span style="padding-left: 20px; padding-right: 20px;">
+                                <span style="padding-right: 20px;">
                                     <label>
                                         @Html.CheckBoxFor(m => m.AvailableYearsNewComp[i].Checked, new { @class = "cb_years" })
                                         @Html.DisplayFor(m => m.AvailableYearsNewComp[i].Name)
@@ -233,6 +233,7 @@
                  data-downloadurl="@Url.Action("DownloadFile", "LUICalculation")"
                  data-isPublic="@Model.IsPublicAccess">
                 <button type="button" class="dtm-download bx-button function" data-download="text/csv">Download (zip)</button>
+                @*<div id="downloadLuiSpinner" style=""><span class="fa fa-spinner fa-pulse" ></span> Fetching Data</div>*@
                 @*<button type="button" class="dtm-download bx-button function" data-download="text/tsv">Download Tab Separated</button>*@
             </div>
             <br />
@@ -252,6 +253,7 @@
     $(document).ready(function () {
 
         $('.plots').hide();
+        $("downloadLuiSpinner").hide();
 
         $('.plotClick').click(function () {
             $('.plots').slideToggle();
