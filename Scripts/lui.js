@@ -295,6 +295,8 @@
         // get requested file type
         const mimeType = $(this).data('download');
 
+        $("#downloadLuiSpinner").show();
+
         // trigger download process
         $.ajax({
             url: prepUrl,
@@ -306,6 +308,7 @@
             .done(function (d) {
                 $("#preloaderContainer").removePreloader();
                 window.location = dlUrl + '?mimeType=' + encodeURIComponent(mimeType);
+                $("#downloadLuiSpinner").hide();
             })
             .fail(function (e) {
                 console.log(e.responseText);
