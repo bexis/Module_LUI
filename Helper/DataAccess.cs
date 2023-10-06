@@ -55,7 +55,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
 
-            List<ApiDataStatisticModel> statistics = GetMissingValues(datasetId, serverInformation);
+            List<ApiDataStatisticModel> statistics = GetStatistic(datasetId, serverInformation);
 
             DataStructureObject dataStructureObject = GetDataStructure(structureId, serverInformation);
 
@@ -135,7 +135,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             return data;
         }
 
-        public static List<ApiDataStatisticModel> GetMissingValues(string datasetId, ServerInformation serverInformation)
+        public static List<ApiDataStatisticModel> GetStatistic(string datasetId, ServerInformation serverInformation)
         {
             string link = serverInformation.ServerName + "/api/datastatistic/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;

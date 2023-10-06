@@ -319,6 +319,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
             // get data file path
             string pathData = ((Dictionary<string, string>)Session[SESSION_FILE])[mimeType];
 
+            //messsage for log
+            string logMessage = "";
+
            
             //send mail
             var es = new EmailService();
@@ -326,28 +329,32 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
 
-            if (model.IsPublicAccess)
-            {
-                user = "public downloaded";
-            }
-            else
-            {
-                using (UserManager userManager = new UserManager())
-                {
-                    user = "downloaded by " + userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
-                }
-            }
-
             string datasetId;
             if (model.ComponentsSet.SelectedValue.Contains("historic"))
                 datasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
             else
                 datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
 
-            string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version; 
+            string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version;
+
+            if (model.IsPublicAccess)
+            {
+                user = "public downloaded";
+                logMessage = "LUI Calculation public download. Id: " + datasetId + ", Version: " + version + "";
+            }
+            else
+            {
+                logMessage = "LUI Calculation download. Id: " + datasetId + ", Version: " + version + "";
+                using (UserManager userManager = new UserManager())
+                {
+                    user = "downloaded by " + userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
+                }
+            }
 
             string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was  <b>" + user + "</b>";
             es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
+
+            Vaiona.Logging.LoggerFactory.LogCustom(logMessage);
 
 
             // return file for download

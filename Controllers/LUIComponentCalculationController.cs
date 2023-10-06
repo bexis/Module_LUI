@@ -12,6 +12,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Vaiona.Utils.Cfg;
+using Vaiona.Web.Extensions;
+using Vaiona.Web.Mvc.Models;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -20,6 +22,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
         // GET: LUIComponentCalculation
         public ActionResult Index()
         {
+            ViewBag.Title = PresentationModel.GetViewTitleForTenant("LUI Component Calculation", this.Session.GetTenant());
+
             ComponentDataModel model = new ComponentDataModel();
             return View("ComponentCalculation", model);
         }
