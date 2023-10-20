@@ -70,7 +70,7 @@
     //select or deselect all
     $('#checkBox').on('click', function () {
         if ($('#checkBox').is(':checked')) {
-            tbl.rows().select();
+            tbl.rows({ search: 'applied' }).select();
         }
         else {
             tbl.rows().deselect();
