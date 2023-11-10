@@ -39,8 +39,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             //get only last year
             var lastYear = lanuFullData.AsEnumerable().Select(a => a.Field<DateTime>("Year")).Distinct().ToList().Max();
-            DataTable lanuData = lanuFullData.AsEnumerable()
-                                .Where(r => r.Field<DateTime>("Year") == lastYear).CopyToDataTable();
+            //DataTable lanuData = lanuFullData.AsEnumerable()
+            //                    .Where(r => r.Field<DateTime>("Year") == lastYear).CopyToDataTable();
+            DataTable lanuData = lanuFullData.Copy();
+
 
             //get plottype infos
             string datasetIdPlots = Models.Settings.get("lui:epPlotsDataset").ToString();
@@ -163,8 +165,13 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
                         model.Data = dataArrays.ToArray();
 
-                        //upload 
-                        result += "API response: " + DataAccess.Upload(model, GetServerInformation()) + "<br/>";
+                    //add primary key for update
+                    string[] primaryKeys = new string[] { "Year", "EP_PlotID" };
+                    model.PrimaryKeys = primaryKeys;
+                    
+
+                    //upload 
+                    result += "API response: " + DataAccess.Upload(model, GetServerInformation()) + "<br/>";
                     
                 }
             }

@@ -341,7 +341,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             //request.PreAuthenticate = true;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
-            request.Method = "POST";
+            request.Method = "PUT";
             request.ContentType = "application/json";
 
             using (var streamWriter = new StreamWriter(request.GetRequestStream()))
