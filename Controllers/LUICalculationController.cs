@@ -51,7 +51,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 //create model
                 LUIQueryModel model = new LUIQueryModel();
                 bool dataMissing = false;
-                string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                string datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
                 List<ApiDataStatisticModel> statisticModels = DataAccess.GetStatistic(datasetId, GetServerInformation());
                 DataTable years = statisticModels.Where(a => a.VariableName == "Year").Select(c => c.uniqueValues).FirstOrDefault();
                 foreach(DataRow dataRow in years.Rows)
@@ -74,14 +74,16 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     model.IsPublicAccess = true;
                 }
 
-                model.NewComponentsSetDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-                var datasetInfo = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation());
-                model.NewComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.NewComponentsSetDatasetId, GetServerInformation()).Version;
-                XmlDocument doc =  DataAccess.GetMetadata(model.NewComponentsSetDatasetId, GetServerInformation());
-                model.NewComponentsSetLastUpdate = DateTime.Parse(doc.GetElementsByTagName("metadataLastModificationDateType")[0].InnerText).ToString("yyyy-MM-dd");
+                model.DefaultComponentsSetDatasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                var datasetInfo = DataAccess.GetDatasetInfo(model.DefaultComponentsSetDatasetId, GetServerInformation());
+                model.DefaultComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.DefaultComponentsSetDatasetId, GetServerInformation()).Version;
+                XmlDocument doc =  DataAccess.GetMetadata(model.DefaultComponentsSetDatasetId, GetServerInformation());
+                model.DefaultComponentsSetLastUpdate = DateTime.Parse(doc.GetElementsByTagName("metadataLastModificationDateType")[0].InnerText).ToString("yyyy-MM-dd");
 
-                model.AvailableYearsNewComp = GetAvailableYears(model.NewComponentsSetDatasetId, model.IsPublicAccess);
-                model.AvailableYearsOldComp = GetAvailableYears(Models.Settings.get("lui:datasetOldComponentsSet").ToString(), model.IsPublicAccess);
+                model.AvailableYearsDataDefault = GetAvailableYears(model.DefaultComponentsSetDatasetId, model.IsPublicAccess);
+                model.AvailableYearsDataTill2019 = GetAvailableYears(Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString(), model.IsPublicAccess);
+                model.AvailableYearsDataTill2023 = GetAvailableYears(Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString(), model.IsPublicAccess);
+
 
                 return View("Index", model);
 
@@ -142,15 +144,20 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             Session["DataStructureId"] = null;
 
-            if (model.ComponentsSet.SelectedValue == "historic components set")
+            if (model.ComponentsSet.SelectedValue == "historic set till 2019")
             {
-                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureOldComponentsSet");
-                model.DownloadDatasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureTill2019ComponentsSet");
+                model.DownloadDatasetId = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+            }
+            else if(model.ComponentsSet.SelectedValue == "historic set till 2023")
+            {
+                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureTill2023ComponentsSet");
+                model.DownloadDatasetId = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
             }
             else
             {
-                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureNewComponentsSet");
-                model.DownloadDatasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureDefaultComponentsSet");
+                model.DownloadDatasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
 
             }
 
@@ -161,11 +168,14 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string dsId = "";
             switch (model.ComponentsSet.SelectedValue)
             {
-                case "historic components set":
-                    dsId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+                case "historic set till 2019":
+                    dsId = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+                    break;
+                case "historic set till 2023":
+                    dsId = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
                     break;
                 case "default components set":
-                    dsId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                    dsId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
                     break;
             }
 
@@ -330,10 +340,13 @@ namespace BExIS.Modules.Lui.UI.Controllers
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
 
             string datasetId;
-            if (model.ComponentsSet.SelectedValue.Contains("historic"))
-                datasetId = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
+            if (model.ComponentsSet.SelectedValue == "historic set till 2019")
+                datasetId = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+
+            else if (model.ComponentsSet.SelectedValue == "historic set till 2023")
+                datasetId = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
             else
-                datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+                datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
 
             string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version;
 
@@ -383,18 +396,25 @@ namespace BExIS.Modules.Lui.UI.Controllers
             bool exists = false;
             try
             {
-                string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
-                List<ApiDataStatisticModel> statisticsNew = DataAccess.GetStatistic(luiIdNew, GetServerInformation());
-                var countNew = statisticsNew.Select(a => a.count).FirstOrDefault();
-                if(countNew == "0")
+                // check for LUI default dataset 
+                string luiIdDefault = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                List<ApiDataStatisticModel> statisticsDefault = DataAccess.GetStatistic(luiIdDefault, GetServerInformation());
+                var countDefault = statisticsDefault.Select(a => a.count).FirstOrDefault();
+                if(countDefault == "0")
                     return exists == false;
 
+                // check for LUI dataset till 2019
+                string luiId2019 = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+                List<ApiDataStatisticModel> statistics2019 = DataAccess.GetStatistic(luiId2019, GetServerInformation());
+                var count2019 = statistics2019.Select(a => a.count).FirstOrDefault();
+                if (count2019 == "0")
+                    return exists == false;
 
-                // check for LUI old dataset
-                string luiIdOld = Models.Settings.get("lui:datasetOldComponentsSet").ToString();
-                List<ApiDataStatisticModel> statisticsOld = DataAccess.GetStatistic(luiIdOld, GetServerInformation());
-                var countOld = statisticsOld.Select(a => a.count).FirstOrDefault();
-                if (countOld == "0")
+                // check for LUI dataset till 2023
+                string luiId2023 = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
+                List<ApiDataStatisticModel> statistics2023 = DataAccess.GetStatistic(luiId2023, GetServerInformation());
+                var count2023 = statistics2023.Select(a => a.count).FirstOrDefault();
+                if (count2023 == "0")
                     return exists == false;
 
 

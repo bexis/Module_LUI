@@ -41,10 +41,13 @@ namespace BExIS.Modules.Lui.UI.Models
             // Explos and Years
             // gets selected Years
             List<string> selectedYearList = new List<string>();
-            if(model.AvailableYearsNewComp.Where(li => li.Checked).Select(li => li.Name).ToList().Count() >0)
-                selectedYearList = model.AvailableYearsNewComp.Where(li => li.Checked).Select(li => li.Name).ToList();
+
+            if(model.AvailableYearsDataDefault.Where(li => li.Checked).Select(li => li.Name).ToList().Count() >0)
+                selectedYearList = model.AvailableYearsDataDefault.Where(li => li.Checked).Select(li => li.Name).ToList();
+            else if (model.AvailableYearsDataTill2019.Where(li => li.Checked).Select(li => li.Name).ToList().Count() > 0)
+                selectedYearList = model.AvailableYearsDataTill2019.Where(li => li.Checked).Select(li => li.Name).ToList();
             else
-                selectedYearList = model.AvailableYearsOldComp.Where(li => li.Checked).Select(li => li.Name).ToList();
+                selectedYearList = model.AvailableYearsDataTill2023.Where(li => li.Checked).Select(li => li.Name).ToList();
 
             // gets selected Exploratories
             List<string> selectedExploList = model.Explos.Where(li => li.Checked).Select(li => li.Name).ToList();

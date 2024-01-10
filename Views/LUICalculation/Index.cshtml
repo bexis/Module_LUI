@@ -34,13 +34,13 @@
                             else
                             {
                                 <div class="box">
-                                    <b>Source Dataset:</b> @Model.NewComponentsSetDatasetId<br />
+                                    <b>Source Dataset:</b> @Model.DefaultComponentsSetDatasetId<br />
                                 </div>
                                 <div class="box">
-                                    <b>Version:</b> @Model.NewComponentsSetDatasetVersion
+                                    <b>Version:</b> @Model.DefaultComponentsSetDatasetVersion
                                 </div>
                                 <div class="box">
-                                    <b>Last update:</b> @Model.NewComponentsSetLastUpdate
+                                    <b>Last update:</b> @Model.DefaultComponentsSetLastUpdate
                                 </div>
                                 <br /><br />
                                 foreach (var missingCompData in Model.MissingComponentData)
@@ -92,8 +92,9 @@
                 </div>
 
                 <div id="divQuery0" class="dtm-divBox"
-                     data-datasetidOld="@Settings.get("lui:datasetOldComponentsSet")"
-                     data-datasetidNew="@Settings.get("lui:datasetNewComponentsSet")"
+                     data-datasetidTill2019="@Settings.get("lui:datasetTill2019ComponentsSet")" 
+                     data-datasetidTill2023="@Settings.get("lui:datasetTill2023ComponentsSet")" 
+                     data-datasetidDefault="@Settings.get("lui:datasetDefaultComponentsSet")" 
                      data-isPublic="@Model.IsPublicAccess"
                      data-showdataurl="@Url.Action("ShowPrimaryData", "LUICalculation", new { Area = "LUI" })">
                     <p class="dtm-para_green">Please select if you want to extract the raw data (unstandardized) OR if you want to calculate the LUI (standardized).</p>
@@ -161,27 +162,40 @@
                     <br />
 
                     <div id="divQuery2_2" class="dtm-controls">
-                        <div id="yearsOld">
+                        <div id="yearstill2019">
 
-                            @for (int i = 0; i < Model.AvailableYearsOldComp.Count(); i++)
+                            @for (int i = 0; i < Model.AvailableYearsDataTill2019.Count(); i++)
                             {
                                 <span style=" padding-left: 20px; padding-right: 20px;">
                                     <label>
-                                        @Html.CheckBoxFor(m => m.AvailableYearsOldComp[i].Checked, new { @class = "cb_years" })
-                                        @Html.DisplayFor(m => m.AvailableYearsOldComp[i].Name)
-                                        @Html.HiddenFor(m => m.AvailableYearsOldComp[i].Name)
+                                        @Html.CheckBoxFor(m => m.AvailableYearsDataTill2019[i].Checked, new { @class = "cb_years" })
+                                        @Html.DisplayFor(m => m.AvailableYearsDataTill2019[i].Name)
+                                        @Html.HiddenFor(m => m.AvailableYearsDataTill2019[i].Name)
                                     </label>
                                 </span>
                             }
                         </div>
-                        <div id="yearsNew">
-                            @for (int i = 0; i < Model.AvailableYearsNewComp.Count(); i++)
+                        <div id="yearstill2023">
+
+                            @for (int i = 0; i < Model.AvailableYearsDataTill2023.Count(); i++)
+                            {
+                                <span style=" padding-left: 20px; padding-right: 20px;">
+                                    <label>
+                                        @Html.CheckBoxFor(m => m.AvailableYearsDataTill2023[i].Checked, new { @class = "cb_years" })
+                                        @Html.DisplayFor(m => m.AvailableYearsDataTill2023[i].Name)
+                                        @Html.HiddenFor(m => m.AvailableYearsDataTill2023[i].Name)
+                                    </label>
+                                </span>
+                            }
+                        </div>
+                        <div id="yearsDefault">
+                            @for (int i = 0; i < Model.AvailableYearsDataDefault.Count(); i++)
                             {
                                 <span style="padding-right: 20px;">
                                     <label>
-                                        @Html.CheckBoxFor(m => m.AvailableYearsNewComp[i].Checked, new { @class = "cb_years" })
-                                        @Html.DisplayFor(m => m.AvailableYearsNewComp[i].Name)
-                                        @Html.HiddenFor(m => m.AvailableYearsNewComp[i].Name)
+                                        @Html.CheckBoxFor(m => m.AvailableYearsDataDefault[i].Checked, new { @class = "cb_years" })
+                                        @Html.DisplayFor(m => m.AvailableYearsDataDefault[i].Name)
+                                        @Html.HiddenFor(m => m.AvailableYearsDataDefault[i].Name)
                                     </label>
                                 </span>
                             }
