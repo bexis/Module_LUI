@@ -171,7 +171,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         public static List<MissingComponentData> GetMissingComponentData(ServerInformation serverInformation)
         {
             List<MissingComponentData> data = new List<MissingComponentData>();
-            string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+            string datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
             long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId, serverInformation).DataStructureId, CultureInfo.InvariantCulture);
             DataTable compData = GetData(datasetId, structureId, serverInformation);
 
