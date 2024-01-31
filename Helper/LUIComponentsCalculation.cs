@@ -16,6 +16,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             landuseData = data;
             landuseFullData = fullData;
             plotTypes = plotTypesData;
+            warnings = new List<string>();
             DataCorrections();
         }
 
@@ -56,6 +57,10 @@ namespace BExIS.Modules.Lui.UI.Helper
                 dr["Year"] = row.Field<DateTime>("Year").Year;
                 dr["Exploratory"] = row.Field<string>("Exploratory");
                 dr["EP_PlotID"] = row.Field<string>("EP_PlotID");
+                if(row.Field<string>("EP_PlotID") == "SEG44")
+                {
+                    var a = "test";
+                }
                 //get MIP/VIP info
                 dr["isVIP"] = plotTypes.AsEnumerable().Where(a=>a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).Select(e=>e.Field<string>("VIP")).FirstOrDefault();
                 dr["isMIP"] = plotTypes.AsEnumerable().Where(a => a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).Select(e => e.Field<string>("MIP")).FirstOrDefault(); ;
@@ -65,16 +70,16 @@ namespace BExIS.Modules.Lui.UI.Helper
                 #region TotalGrazing
                 //Calculate grazing intensities (grazing1-grazing4)
                 var Grazing1 = row.Field<double>("LivestockUnits1") * row.Field<double>("DayGrazing1") / row.Field<double>("GrazingArea1");
-                if (double.IsNaN(Grazing1))
+                if (double.IsNaN(Grazing1) || Grazing1 == -999999)
                     Grazing1 = 0;
                 var Grazing2 = row.Field<double>("LivestockUnits2") * row.Field<double>("DayGrazing2") / row.Field<double>("GrazingArea2");
-                if (double.IsNaN(Grazing2))
+                if (double.IsNaN(Grazing2) || Grazing2 == -999999)
                     Grazing2 = 0;
                 var Grazing3 = row.Field<double>("LivestockUnits3") * row.Field<double>("DayGrazing3") / row.Field<double>("GrazingArea3");
-                if (double.IsNaN(Grazing3))
+                if (double.IsNaN(Grazing3) || Grazing3 == -999999)
                     Grazing3 = 0;
                 var Grazing4 = row.Field<double>("LivestockUnits4") * row.Field<double>("DayGrazing4") / row.Field<double>("GrazingArea4");
-                if (double.IsNaN(Grazing4))
+                if (double.IsNaN(Grazing4) || Grazing4 == -999999)
                     Grazing4 = 0;
 
                 double TotalGrazing = Grazing1 + Grazing2 + Grazing3 + Grazing4;
@@ -89,20 +94,28 @@ namespace BExIS.Modules.Lui.UI.Helper
                 //Calculate organic N from manure, slurry, sludge and mash 
 
                 double NorgManure;
-                switch(row.Field<string>("TypeManure"))
+                string ExactValOrgY0 = row.Field<string>("ExactValOrg");
+                if (ExactValOrgY0 == "ja")
                 {
-                    case "Rind":
-                        NorgManure = row.Field<double>("Manure_tha") * 5.6;
-                        break;
-                    case "Pferd":
-                        NorgManure = row.Field<double>("Manure_tha") * 4.9;
-                        break;
-                    case "Schaf":
-                        NorgManure = row.Field<double>("Manure_tha") * 8.13;
-                        break;
-                    default:
-                        NorgManure = 0;
-                        break;
+                    NorgManure = row.Field<double>("NorgExact");
+                }
+                else
+                {
+                    switch (row.Field<string>("TypeManure"))
+                    {
+                        case "Rind":
+                            NorgManure = row.Field<double>("Manure_tha") * 5.6;
+                            break;
+                        case "Pferd":
+                            NorgManure = row.Field<double>("Manure_tha") * 4.9;
+                            break;
+                        case "Schaf":
+                            NorgManure = row.Field<double>("Manure_tha") * 8.13;
+                            break;
+                        default:
+                            NorgManure = 0;
+                            break;
+                    }
                 }
 
                 double NorgSlurry;
@@ -145,43 +158,64 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                 if (NorgManureY1data != null)
                 {
-                    switch(NorgManureY1data.Field<string>("TypeManure"))
+                    string ExactValOrgY1 = NorgManureY1data.Field<string>("ExactValOrg");
+
+                    if (ExactValOrgY1 == "ja")
                     {
-                        case "Rind":
-                            NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 5.6;
-                        break;
-                        case "Pferd":
-                            NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 4.9;
-                            break;
-                        case "Schaf":
-                            NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 8.13;
-                            break;
-                        default:
-                            NorgManureY1 = 0;
-                            break;
+                        NorgManureY1 = NorgManureY1data.Field<double>("NorgExact");
+                    }
+                    else
+                    {
+                        switch (NorgManureY1data.Field<string>("TypeManure"))
+                        {
+                            case "Rind":
+                                NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 5.6;
+                                break;
+                            case "Pferd":
+                                NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 4.9;
+                                break;
+                            case "Schaf":
+                                NorgManureY1 = NorgManureY1data.Field<double>("Manure_tha") * 8.13;
+                                break;
+                            default:
+                                NorgManureY1 = 0;
+                                break;
+                        }
                     }
                 }
 
                 var NorgManureY2data = pastYears.AsEnumerable().Where(a => a.Field<DateTime>("Year").ToString("yyyy") == year2 && a.Field<string>("EP_PlotID") == row.Field<string>("EP_PlotID")).FirstOrDefault();
                 double NorgManureY2 = 0;
+                
                 if (NorgManureY2data != null)
                 {
-                    switch (NorgManureY2data.Field<string>("TypeManure"))
+                    string ExactValOrgY2 = NorgManureY2data.Field<string>("ExactValOrg");
+
+                    if (ExactValOrgY2 == "ja")
                     {
-                        case "Rind":
-                            NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 5.6;
-                            break;
-                        case "Pferd":
-                            NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 4.9;
-                            break;
-                        case "Schaf":
-                            NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 8.13;
-                            break;
-                        default:
-                            NorgManureY2 = 0;
-                            break;
+                        NorgManureY2 = NorgManureY2data.Field<double>("NorgExact");
+                    }
+                    else
+                    {
+                        switch (NorgManureY2data.Field<string>("TypeManure"))
+                        {
+                            case "Rind":
+                                NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 5.6;
+                                break;
+                            case "Pferd":
+                                NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 4.9;
+                                break;
+                            case "Schaf":
+                                NorgManureY2 = NorgManureY2data.Field<double>("Manure_tha") * 8.13;
+                                break;
+                            default:
+                                NorgManureY2 = 0;
+                                break;
+                        }
                     }
                 }
+
+               
 
                 double NorgManureEff = (0.4 * NorgManure) + (0.3*NorgManureY1) + (0.3* NorgManureY2);
 
@@ -189,10 +223,8 @@ namespace BExIS.Modules.Lui.UI.Helper
                 //Calculate total organic N or take direct measurements from the data table
 
                 double Norg;
-                if (row.Field<string>("ExactValOrg") == "ja")
-                    Norg = row.Field<double>("NorgExact");
-                else
-                    Norg = NorgManureEff + NorgSlurry + NorgBiogas;
+
+                Norg = NorgManureEff + NorgSlurry + NorgBiogas;
 
                 //Calculate TotalFertilization
 
@@ -222,19 +254,19 @@ namespace BExIS.Modules.Lui.UI.Helper
         private void DataCorrections()
         {
             //Interpolate missing data of fertilization -> not needed because the case is very rare
-
+            
            var slurryNAs = landuseData.AsEnumerable().Where(r => r.Field<double>("Slurry_m3ha") == -999999 && r.Field<string>("TypeSlurry") == "999999");
 
             foreach(var row in slurryNAs)
             {
-                warnings.Add("Slurry_m3ha and TypeSlurry == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<string>("Year"));
+                warnings.Add("Slurry_m3ha and TypeSlurry == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<DateTime>("Year").ToString("yyyy"));
             }
 
             var NitrogenNAs = landuseData.AsEnumerable().Where(r => r.Field<double>("minNitrogen_kgNha") == -999999);
 
             foreach (var row in NitrogenNAs)
             {
-                warnings.Add("NitrogenNAs == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<string>("Year"));
+                warnings.Add("NitrogenNAs == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<DateTime>("Year").ToString("yyyy"));
             }
 
 

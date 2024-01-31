@@ -171,7 +171,7 @@ namespace BExIS.Modules.Lui.UI.Helper
         public static List<MissingComponentData> GetMissingComponentData(ServerInformation serverInformation)
         {
             List<MissingComponentData> data = new List<MissingComponentData>();
-            string datasetId = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+            string datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
             long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId, serverInformation).DataStructureId, CultureInfo.InvariantCulture);
             DataTable compData = GetData(datasetId, structureId, serverInformation);
 
@@ -341,7 +341,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
             //request.PreAuthenticate = true;
             request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
-            request.Method = "POST";
+            request.Method = "PUT";
             request.ContentType = "application/json";
 
             using (var streamWriter = new StreamWriter(request.GetRequestStream()))

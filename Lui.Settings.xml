@@ -5,11 +5,21 @@
   <entry key="key3" value="21" type="Int16"/>
 
   <!-- LUI settings -->
-  <entry key="lui:datasetOldComponentsSet" value="19266" type="int"/>
+  <!--<entry key="lui:datasetOldComponentsSet" value="19266" type="int"/>
   <entry key="lui:datastructureOldComponentsSet" value="663" type="int"/>
 
   <entry key="lui:datasetNewComponentsSet" value="25086" type="int"/>
-  <entry key="lui:datastructureNewComponentsSet" value="1056" type="int"/>
+  <entry key="lui:datastructureNewComponentsSet" value="1056" type="int"/>-->
+
+	<entry key="lui:datasetTill2019ComponentsSet" value="19266" type="int"/>
+	<entry key="lui:datastructureTill2019ComponentsSet" value="663" type="int"/>
+
+	<entry key="lui:datasetTill2023ComponentsSet" value="25086" type="int"/>
+	<entry key="lui:datastructureTill2023ComponentsSet" value="1056" type="int"/>
+
+	<entry key="lui:datasetDefaultComponentsSet" value="31661" type="int"/>
+	<entry key="lui:datastructureDefaultComponentsSet" value="1056" type="int"/>
+
 
   <entry key="lui:years:min" value="2006" type="int" />
   <entry key="lui:years:max" value="2020" type="int" />

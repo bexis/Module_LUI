@@ -111,6 +111,7 @@ namespace BExIS.Modules.Lui.UI.Models
 
     public class DataApiModel
     {
+        public string[] PrimaryKeys { get; set; }
         public long DatasetId { get; set; }
         public DecimalCharacter DecimalCharacter { get; set; }
         public string[] Columns { get; set; }

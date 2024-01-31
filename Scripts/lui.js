@@ -7,19 +7,24 @@
     /* XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Setup XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX */
 
     const $dataEl = $('#divQuery0'),
-        datasetIdOld = $dataEl.data('datasetidold'),
-        datasetIdNew = $dataEl.data('datasetidnew'),
+        datasetidTill2019 = $dataEl.data('datasetidtill2019'),
+        datasetidTill2023 = $dataEl.data('datasetidtill2023'),
+        datasetidDefault = $dataEl.data('datasetiddefault'),
         showdataUrl = $dataEl.data('showdataurl'),
         isPublic = $dataEl.data('ispublic');
 
 
-    $("#yearsOld").hide();
-    $("#yearsNew").show();
+    $("#yearstill2019").hide();
+    $("#yearstill2023").hide();
+    $("#yearsDefault").show();
 
 
     /* XXXXXXXXXXXXXXXXXXXXXXXXXX Event Handlers XXXXXXXXXXXXXXXXXXXXXXXXXXX */
-
-    var datasetId = datasetIdNew;
+    console.log(isPublic);
+    console.log("ds default:", datasetidDefault);
+    console.log("ds 2019:", datasetidTill2019);
+    console.log("ds 2023:", datasetidTill2023);
+    var datasetId = datasetidDefault;
     var isPublicAccess = isPublic.toLowerCase();
 
     /* ------------------------------ Query 00 ------------------------------ */
@@ -38,20 +43,31 @@
 
             //get datasetId
             var selecteddataset = $(this).val();
-            console.log(datasetIdOld);
+
+            //console.log(datasetIdOld);
             console.log(selecteddataset);
 
-            if (selecteddataset == "historic components set") {
+            if (selecteddataset == "historic set till 2019") {
 
-                datasetId = datasetIdOld;
-                console.log("old");
-                $("#yearsOld").show();
-                $("#yearsNew").hide();
+                datasetId = datasetidTill2019;
+                console.log("2019");
+                $("#yearstill2019").show();
+                $("#yearstill2023").hide();
+                $("#yearsDefault").hide();
+            }
+            else if (selecteddataset == "historic set till 2023")
+            {
+                datasetId = datasetidTill2023;
+                console.log("2023");
+                $("#yearstill2023").show();
+                $("#yearstill2019").hide();
+                $("#yearsDefault").hide();
             }
             else {
-                datasetId = datasetIdNew;
-                $("#yearsNew").show();
-                $("#yearsOld").hide();
+                datasetId = datasetidDefault;
+                $("#yearstill2019").hide();
+                $("#yearstill2023").hide();
+                $("#yearsDefault").show();
             }
 
         });
@@ -193,7 +209,7 @@
                     return;
                 }
             }
-            if ($("input[id^='AvailableYearsOldComp']:checked").length < 1 && $("input[id^='AvailableYearsNewComp']:checked").length < 1) {
+            if ($("input[id^='AvailableYearsDataTill2019']:checked").length < 1 && $("input[id^='AvailableYearsDataTill2023']:checked").length < 1 && $("input[id^='AvailableYearsDataDefault']:checked").length < 1) {
                 $('#errYears').show();
                 return;
             }

@@ -21,18 +21,20 @@ namespace BExIS.Modules.Lui.UI.Models
 
         public List<MissingComponentData> MissingComponentData { get; set; }
 
-        public List<CheckboxControlHelper> AvailableYearsNewComp { get; set; }
+        public List<CheckboxControlHelper> AvailableYearsDataTill2019 { get; set; }
 
-        public List<CheckboxControlHelper> AvailableYearsOldComp { get; set; }
+        public List<CheckboxControlHelper> AvailableYearsDataTill2023 { get; set; }
+
+        public List<CheckboxControlHelper> AvailableYearsDataDefault { get; set; }
 
 
-        public string NewComponentsSetDatasetId { get; set; }
+        public string DefaultComponentsSetDatasetId { get; set; }
 
-        public string NewComponentsSetDatasetVersion { get; set; }
+        public string DefaultComponentsSetDatasetVersion { get; set; }
 
         public string DownloadDatasetId { get; set; }
 
-        public string NewComponentsSetLastUpdate { get; set; }
+        public string DefaultComponentsSetLastUpdate { get; set; }
 
         public bool IsPublicAccess { get; set; }
 
@@ -46,8 +48,9 @@ namespace BExIS.Modules.Lui.UI.Models
             TypeOfMean = new RadioButtonControlHelper();
             Plotlevel = new RadioButtonControlHelper();
             ComponentsSet = new RadioButtonControlHelper();
-            AvailableYearsNewComp = new List<CheckboxControlHelper>();
-            AvailableYearsOldComp = new List<CheckboxControlHelper>();
+            AvailableYearsDataTill2019 = new List<CheckboxControlHelper>();
+            AvailableYearsDataTill2023 = new List<CheckboxControlHelper>();
+            AvailableYearsDataDefault = new List<CheckboxControlHelper>();
 
 
             IsPublicAccess = false;
@@ -56,7 +59,7 @@ namespace BExIS.Modules.Lui.UI.Models
 
             //fill ComponentsSet
             ComponentsSet.SelectedValue = "default components set";
-            ComponentsSet.Values = new List<string>() { "historic components set", "default components set" };
+            ComponentsSet.Values = new List<string>() { "historic set till 2019", "historic set till 2023", "default components set" };
 
 
             // fill RawVsCalc
