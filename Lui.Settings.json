@@ -1,0 +1,97 @@
+{
+  "id": "lui",
+  "name": "Index of land-use intensity",
+  "description": "...",
+  "entries": [
+    {
+      "key": "help",
+      "title": "Help URL",
+      "value": "",
+      "type": "String",
+      "description": "URL to the manual. If empty, it links to the latest manual from BEXIS2"
+    },
+    {
+      "key": "lui:datasetTill2019ComponentsSet",
+      "title": "dataset till 2019 componentsSet",
+      "value": 19266,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:datastructureTill2019ComponentsSet",
+      "title": "datastructure till 2019 componentsSet",
+      "value": 663,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:datasetTill2023ComponentsSet",
+      "title": "dataset till 2023 componentsSet",
+      "value": 25086,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:datastructureTill2023ComponentsSet",
+      "title": "datastructure till 2023 componentsSet",
+      "value": 1056,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:datasetDefaultComponentsSet",
+      "title": "dataset default componentsSet",
+      "value": 31661,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:datastructureDefaultComponentsSet",
+      "title": "datastructure default componentsSet",
+      "value": 1056,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:lanuDataset",
+      "title": "lanuDataset",
+      "value": 26487,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:epPlotsDataset",
+      "title": "epPlotsDataset",
+      "value": 20826,
+      "description": "",
+      "type": "Int16",
+      "options": []
+    },
+    {
+      "key": "lui:filename:download",
+      "title": "filename:download",
+      "value": "LUI",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "lui:filename:namespace",
+      "title": "filename:namespace",
+      "value": "LUI",
+      "description": "",
+      "type": "String",
+      "options": []
+    }
+
+
+
+  ]
+}

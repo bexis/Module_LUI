@@ -14,11 +14,13 @@ using System.Web;
 using System.Web.Script.Serialization;
 using System.Xml;
 using Vaiona.Utils.Cfg;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Lui.UI.Helper
 {
     public class DataAccess
     {
+
         /// <summary>
         /// Get metadata
         /// </summary>
@@ -171,7 +173,9 @@ namespace BExIS.Modules.Lui.UI.Helper
         public static List<MissingComponentData> GetMissingComponentData(ServerInformation serverInformation)
         {
             List<MissingComponentData> data = new List<MissingComponentData>();
-            string datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+            var settings = ModuleManager.GetModuleSettings("lui");
+
+            string datasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
             long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId, serverInformation).DataStructureId, CultureInfo.InvariantCulture);
             DataTable compData = GetData(datasetId, structureId, serverInformation);
 
@@ -278,7 +282,9 @@ namespace BExIS.Modules.Lui.UI.Helper
         /// <returns>list of grasland ep plot ids</returns>
         public static List<string> getAllGrasslandPlots(ServerInformation serverInformation)
         {
-            string datasetId = Models.Settings.get("lui:epPlotsDataset").ToString();
+            var settings = ModuleManager.GetModuleSettings("lui");
+
+            string datasetId = settings.GetValueByKey("lui:epPlotsDataset").ToString();
 
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;

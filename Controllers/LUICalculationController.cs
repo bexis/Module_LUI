@@ -22,6 +22,10 @@ using Vaiona.Web.Mvc.Modularity;
 using System.Web.Routing;
 using Microsoft.AspNet.Identity;
 using System.Globalization;
+using BExIS.Utils.Config;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -36,7 +40,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
         private static string SESSION_FILE = "lui:resultFile";
 
         // namespace for download files
-        private static string FILE_NAMESPACE = Models.Settings.get("lui:filename:namespace") as string;
+        private static string FILE_NAMESPACE = ModuleManager.GetModuleSettings("lui").GetValueByKey("lui:filename:namespace") as string;
         #endregion
 
         // GET: Main
@@ -47,11 +51,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 // set page title
                 ViewBag.Title = PresentationModel.GetViewTitleForTenant(TITLE, this.Session.GetTenant());
 
+                var settings = ModuleManager.GetModuleSettings("lui");
 
                 //create model
                 LUIQueryModel model = new LUIQueryModel();
                 bool dataMissing = false;
-                string datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                string datasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
                 List<ApiDataStatisticModel> statisticModels = DataAccess.GetStatistic(datasetId, GetServerInformation());
                 DataTable years = statisticModels.Where(a => a.VariableName == "Year").Select(c => c.uniqueValues).FirstOrDefault();
                 foreach(DataRow dataRow in years.Rows)
@@ -74,15 +79,15 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     model.IsPublicAccess = true;
                 }
 
-                model.DefaultComponentsSetDatasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                model.DefaultComponentsSetDatasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
                 var datasetInfo = DataAccess.GetDatasetInfo(model.DefaultComponentsSetDatasetId, GetServerInformation());
                 model.DefaultComponentsSetDatasetVersion = DataAccess.GetDatasetInfo(model.DefaultComponentsSetDatasetId, GetServerInformation()).Version;
                 XmlDocument doc =  DataAccess.GetMetadata(model.DefaultComponentsSetDatasetId, GetServerInformation());
                 model.DefaultComponentsSetLastUpdate = DateTime.Parse(doc.GetElementsByTagName("metadataLastModificationDateType")[0].InnerText).ToString("yyyy-MM-dd");
 
                 model.AvailableYearsDataDefault = GetAvailableYears(model.DefaultComponentsSetDatasetId, model.IsPublicAccess);
-                model.AvailableYearsDataTill2019 = GetAvailableYears(Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString(), model.IsPublicAccess);
-                model.AvailableYearsDataTill2023 = GetAvailableYears(Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString(), model.IsPublicAccess);
+                model.AvailableYearsDataTill2019 = GetAvailableYears(settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString(), model.IsPublicAccess);
+                model.AvailableYearsDataTill2023 = GetAvailableYears(settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString(), model.IsPublicAccess);
 
 
                 return View("Index", model);
@@ -144,20 +149,22 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             Session["DataStructureId"] = null;
 
+            var settings = ModuleManager.GetModuleSettings("lui");
+
             if (model.ComponentsSet.SelectedValue == "historic set till 2019")
             {
-                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureTill2019ComponentsSet");
-                model.DownloadDatasetId = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+                selectedDataStructureId = (int)settings.GetValueByKey("lui:datastructureTill2019ComponentsSet");
+                model.DownloadDatasetId = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
             }
             else if(model.ComponentsSet.SelectedValue == "historic set till 2023")
             {
-                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureTill2023ComponentsSet");
-                model.DownloadDatasetId = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
+                selectedDataStructureId = (int)settings.GetValueByKey("lui:datastructureTill2023ComponentsSet");
+                model.DownloadDatasetId = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
             }
             else
             {
-                selectedDataStructureId = (int)Models.Settings.get("lui:datastructureDefaultComponentsSet");
-                model.DownloadDatasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                selectedDataStructureId = (int)settings.GetValueByKey("lui:datastructureDefaultComponentsSet");
+                model.DownloadDatasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
 
             }
 
@@ -169,13 +176,13 @@ namespace BExIS.Modules.Lui.UI.Controllers
             switch (model.ComponentsSet.SelectedValue)
             {
                 case "historic set till 2019":
-                    dsId = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+                    dsId = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
                     break;
                 case "historic set till 2023":
-                    dsId = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
+                    dsId = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
                     break;
                 case "default components set":
-                    dsId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                    dsId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
                     break;
             }
 
@@ -211,7 +218,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             // filename
             // use unix timestamp to make filenames unique
-            string filename = Models.Settings.get("lui:filename:download") as string;
+            var settings = ModuleManager.GetModuleSettings("lui");
+            string filename = settings.GetValueByKey("lui:filename:download") as string;
 
             //result datatable
             DataTable downloadData = new DataTable();
@@ -339,14 +347,16 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
 
+            var settings = ModuleManager.GetModuleSettings("lui");
+
             string datasetId;
             if (model.ComponentsSet.SelectedValue == "historic set till 2019")
-                datasetId = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+                datasetId = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
 
             else if (model.ComponentsSet.SelectedValue == "historic set till 2023")
-                datasetId = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
+                datasetId = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
             else
-                datasetId = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                datasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
 
             string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version;
 
@@ -394,24 +404,26 @@ namespace BExIS.Modules.Lui.UI.Controllers
         {
             // check for LUI new dataset
             bool exists = false;
+            var settings = ModuleManager.GetModuleSettings("lui");
+
             try
             {
                 // check for LUI default dataset 
-                string luiIdDefault = Models.Settings.get("lui:datasetDefaultComponentsSet").ToString();
+                string luiIdDefault = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
                 List<ApiDataStatisticModel> statisticsDefault = DataAccess.GetStatistic(luiIdDefault, GetServerInformation());
                 var countDefault = statisticsDefault.Select(a => a.count).FirstOrDefault();
                 if(countDefault == "0")
                     return exists == false;
 
                 // check for LUI dataset till 2019
-                string luiId2019 = Models.Settings.get("lui:datasetTill2019ComponentsSet").ToString();
+                string luiId2019 = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
                 List<ApiDataStatisticModel> statistics2019 = DataAccess.GetStatistic(luiId2019, GetServerInformation());
                 var count2019 = statistics2019.Select(a => a.count).FirstOrDefault();
                 if (count2019 == "0")
                     return exists == false;
 
                 // check for LUI dataset till 2023
-                string luiId2023 = Models.Settings.get("lui:datasetTill2023ComponentsSet").ToString();
+                string luiId2023 = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
                 List<ApiDataStatisticModel> statistics2023 = DataAccess.GetStatistic(luiId2023, GetServerInformation());
                 var count2023 = statistics2023.Select(a => a.count).FirstOrDefault();
                 if (count2023 == "0")
@@ -450,28 +462,50 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// <returns></returns>
         private string GetUserToken()
         {
-            var identityUserService = new IdentityUserService();
-            var userManager = new UserManager();
-
+            string jwt_token = "";
             try
             {
-                long userId = 0;
-                long.TryParse(this.User.Identity.GetUserId(), out userId);
+                using (var identityUserService = new IdentityUserService())
+                using (var userManager = new UserManager())
+                {
+                    var jwtConfiguration = GeneralSettings.JwtConfiguration;
 
-                if(userId==0)
-                    return "";
+                    long userId = 0;
+                    long.TryParse(this.User.Identity.GetUserId(), out userId);
+                    var user = userManager.FindByIdAsync(userId).Result;
+                    //var user = identityUserService.FindById(userId);
+                  
+                    if (user != null)
+                    {
+                        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.IssuerSigningKey));
+                        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var user = identityUserService.FindById(userId);
+                        //Create a List of Claims, Keep claims name short
+                        var permClaims = new List<Claim>
+                        {
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                            new Claim(ClaimTypes.Name, user.UserName)
+                        };
 
-                user = identityUserService.FindById(userId);
-                var token = userManager.GetTokenAsync(user).Result;
-                return token;
+                        //Create Security Token object by giving required parameters
+                        var token = new JwtSecurityToken(jwtConfiguration.ValidIssuer,
+                        jwtConfiguration.ValidAudience,
+                        permClaims,
+                        notBefore: DateTime.Now,
+                            expires: DateTime.Now.AddHours(100000000),
+                            signingCredentials: credentials); ;
+
+                         jwt_token = new JwtSecurityTokenHandler().WriteToken(token);  
+                    }
+                }
             }
-            finally
+            catch
             {
-                identityUserService.Dispose();
-                userManager.Dispose();
+
             }
+            return jwt_token;
+
         }
 
         /// <summary>

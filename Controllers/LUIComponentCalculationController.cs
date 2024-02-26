@@ -1,19 +1,25 @@
 ﻿using BExIS.Modules.Lui.UI.Helper;
 using BExIS.Modules.Lui.UI.Models;
 using BExIS.Security.Services.Subjects;
+using BExIS.Utils.Config;
 using Microsoft.AspNet.Identity;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Vaiona.Utils.Cfg;
 using Vaiona.Web.Extensions;
 using Vaiona.Web.Mvc.Models;
+using Vaiona.Web.Mvc.Modularity;
 
 namespace BExIS.Modules.Lui.UI.Controllers
 {
@@ -31,7 +37,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
         public ActionResult CalculateCompontents()
         {
             Session["ComponentData"] = null;
-            string datasetId = Models.Settings.get("lui:lanuDataset").ToString();
+
+            var settings = ModuleManager.GetModuleSettings("lui");
+
+            string datasetId = settings.GetValueByKey("lui:lanuDataset").ToString();
             //get data structureId
             long structureId = long.Parse(DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
 
@@ -45,7 +54,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
 
             //get plottype infos
-            string datasetIdPlots = Models.Settings.get("lui:epPlotsDataset").ToString();
+            string datasetIdPlots = settings.GetValueByKey("lui:epPlotsDataset").ToString();
             //get data structureId
             long structureIdPlots = long.Parse(DataAccess.GetDatasetInfo(datasetIdPlots, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
             DataTable plotTypes = DataAccess.GetData(datasetIdPlots, structureIdPlots, GetServerInformation());
@@ -123,7 +132,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
 
                     DataApiModel model = new DataApiModel();
-                    model.DatasetId = Convert.ToInt64(Models.Settings.get("lui:datasetNewComponentsSet"));
+
+                    var settings = ModuleManager.GetModuleSettings("lui");
+
+                    model.DatasetId = Convert.ToInt64(settings.GetValueByKey("lui:datasetNewComponentsSet"));
                     model.DecimalCharacter = DecimalCharacter.point;
 
                     //get col names
@@ -185,25 +197,50 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         private string GetUserToken()
         {
-            var identityUserService = new IdentityUserService();
-            var userManager = new UserManager();
-
+            string jwt_token = "";
             try
             {
-                long userId = 0;
-                long.TryParse(this.User.Identity.GetUserId(), out userId);
+                using (var identityUserService = new IdentityUserService())
+                using (var userManager = new UserManager())
+                {
+                    var jwtConfiguration = GeneralSettings.JwtConfiguration;
 
-                var user = identityUserService.FindById(userId);
+                    long userId = 0;
+                    long.TryParse(this.User.Identity.GetUserId(), out userId);
+                    var user = userManager.FindByIdAsync(userId).Result;
+                    //var user = identityUserService.FindById(userId);
 
-                user = identityUserService.FindById(userId);
-                var token = userManager.GetTokenAsync(user).Result;
-                return token;
+                    if (user != null)
+                    {
+                        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.IssuerSigningKey));
+                        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+                        //Create a List of Claims, Keep claims name short
+                        var permClaims = new List<Claim>
+                        {
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                            new Claim(ClaimTypes.Name, user.UserName)
+                        };
+
+                        //Create Security Token object by giving required parameters
+                        var token = new JwtSecurityToken(jwtConfiguration.ValidIssuer,
+                        jwtConfiguration.ValidAudience,
+                        permClaims,
+                        notBefore: DateTime.Now,
+                            expires: DateTime.Now.AddHours(100000000),
+                            signingCredentials: credentials); ;
+
+                        jwt_token = new JwtSecurityTokenHandler().WriteToken(token);
+                    }
+                }
             }
-            finally
+            catch
             {
-                identityUserService.Dispose();
-                userManager.Dispose();
+
             }
+            return jwt_token;
+
         }
 
         /// <summary>
@@ -226,7 +263,9 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
         private int[] CheckDuplicates(DataTable newCompData, int[] rowIds)
         {
-            string luiIdNew = Models.Settings.get("lui:datasetNewComponentsSet").ToString();
+            var settings = ModuleManager.GetModuleSettings("lui");
+
+            string luiIdNew = settings.GetValueByKey("lui:datasetNewComponentsSet").ToString();
             long structureId = long.Parse(DataAccess.GetDatasetInfo(luiIdNew, GetServerInformation()).DataStructureId, CultureInfo.InvariantCulture);
 
             DataTable allCompData = DataAccess.GetData(luiIdNew, structureId, GetServerInformation());
