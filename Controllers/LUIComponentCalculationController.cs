@@ -106,30 +106,31 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 ComponentDataModel compData = Session["ComponentData"] as ComponentDataModel;
 
                 //check for dublicates
-                int[] duplicateIds = CheckDuplicates(compData.Data, rowIds);
+                int[] duplicateIds = new int[0];
+                //CheckDuplicates(compData.Data, rowIds);
 
-                if (duplicateIds.Length == rowIds.Length)
-                {
-                    result = "No Upload: all selected rows are already uploaded!";
-                }
-                else
-                {
-                    //get duplicated ids for result text
-                    //var dups = rowIds.Except(noDuplicateIds);
-                    if (duplicateIds.Length > 0)
-                    {
-                        result += "Duplicated ids not uploaded: ";
-                        foreach (int d in duplicateIds)
-                        {
-                            if(duplicateIds.Last() == d)
-                                result += d.ToString() + " ";
-                            else
-                                result += d.ToString() + ", ";
-                        }
+                //if (duplicateIds.Length == rowIds.Length)
+                //{
+                //    result = "No Upload: all selected rows are already uploaded!";
+                //}
+                //else
+                //{
+                //    //get duplicated ids for result text
+                //    //var dups = rowIds.Except(noDuplicateIds);
+                //    if (duplicateIds.Length > 0)
+                //    {
+                //        result += "Duplicated ids not uploaded: ";
+                //        foreach (int d in duplicateIds)
+                //        {
+                //            if(duplicateIds.Last() == d)
+                //                result += d.ToString() + " ";
+                //            else
+                //                result += d.ToString() + ", ";
+                //        }
 
-                        result += "<br/>";
-                    }
-
+                //        result += "<br/>";
+                //    }
+            
 
                     DataApiModel model = new DataApiModel();
 
@@ -185,7 +186,7 @@ namespace BExIS.Modules.Lui.UI.Controllers
                     //upload 
                     result += "API response: " + DataAccess.Upload(model, GetServerInformation()) + "<br/>";
                     
-                }
+               // }
             }
             else
             {
