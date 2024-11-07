@@ -1,7 +1,13 @@
 ﻿@model  BExIS.Modules.Lui.UI.Models.LUIQueryModel
 @using BExIS.Modules.Lui.UI.Models
+@using Vaiona.Web.Mvc.Modularity;
 @section scripts {
     <link href="@Url.Content("~/Areas/LUI/Content/main.css")" rel="stylesheet" type="text/css" />
+}
+
+@{
+    var settings = ModuleManager.GetModuleSettings("lui");
+
 }
 
 <table>
@@ -51,7 +57,7 @@
                                     </div>
                                     <div class="box">
                                         <b>Plot coverage:</b><br />
-                                        @foreach(var percentage in missingCompData.ExploPercentage)
+                                        @foreach (var percentage in missingCompData.ExploPercentage)
                                         {
                                             <div>@percentage.Key : @percentage.Value</div>
                                         }
@@ -66,7 +72,7 @@
                                             }
                                         </div>
                                     </div>
-                                    
+
 
                                 }
                             }
@@ -92,9 +98,9 @@
                 </div>
 
                 <div id="divQuery0" class="dtm-divBox"
-                     data-datasetidTill2019="@Settings.get("lui:datasetTill2019ComponentsSet")" 
-                     data-datasetidTill2023="@Settings.get("lui:datasetTill2023ComponentsSet")" 
-                     data-datasetidDefault="@Settings.get("lui:datasetDefaultComponentsSet")" 
+                     data-datasetidTill2019="@settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString()"
+                     data-datasetidTill2023="@settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString()"
+                     data-datasetidDefault="@settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString()"
                      data-isPublic="@Model.IsPublicAccess"
                      data-showdataurl="@Url.Action("ShowPrimaryData", "LUICalculation", new { Area = "LUI" })">
                     <p class="dtm-para_green">Please select if you want to extract the raw data (unstandardized) OR if you want to calculate the LUI (standardized).</p>
@@ -202,7 +208,7 @@
                         </div>
                     </div>
 
-                    <div class="dtm-message dtm-para_green" id="dtmLocationMessages"><div data-location="ALB">@Settings.get("lui:msg:alb")</div><div data-location="HAI">@Settings.get("lui:msg:hai")</div><div data-location="SCH">@Settings.get("lui:msg:sch")</div></div>
+                    <div class="dtm-message dtm-para_green" id="dtmLocationMessages"><div data-location="ALB">@settings.GetValueByKey("lui:msg:alb").ToString()</div><div data-location="HAI">@settings.GetValueByKey("lui:msg:hai").ToString()</div><div data-location="SCH">@settings.GetValueByKey("lui:msg:sch").ToString()</div></div>
 
                     <button id="btnConfirmSelection" type="button" name="Confirm selection" class="bx-button small function">Confirm selection</button>
                     <button id="btnEditSelection" type="button" name="Edit selection" class="bx-button small function bx-disabled" disabled="disabled">Edit selection</button>
@@ -247,7 +253,7 @@
                  data-downloadurl="@Url.Action("DownloadFile", "LUICalculation")"
                  data-isPublic="@Model.IsPublicAccess">
                 <button type="button" class="dtm-download bx-button function" data-download="text/csv">Download (zip)</button>
-                <div id="downloadLuiSpinner" style=""><span class="fa fa-spinner fa-pulse" ></span> Fetching Data</div>
+                <div id="downloadLuiSpinner" style=""><span class="fa fa-spinner fa-pulse"></span> Fetching Data</div>
                 @*<button type="button" class="dtm-download bx-button function" data-download="text/tsv">Download Tab Separated</button>*@
             </div>
             <br />

@@ -153,17 +153,17 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             if (model.ComponentsSet.SelectedValue == "historic set till 2019")
             {
-                selectedDataStructureId = (int)settings.GetValueByKey("lui:datastructureTill2019ComponentsSet");
+                selectedDataStructureId = int.Parse(settings.GetValueByKey("lui:datastructureTill2019ComponentsSet").ToString());
                 model.DownloadDatasetId = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
             }
             else if(model.ComponentsSet.SelectedValue == "historic set till 2023")
             {
-                selectedDataStructureId = (int)settings.GetValueByKey("lui:datastructureTill2023ComponentsSet");
+                selectedDataStructureId = int.Parse(settings.GetValueByKey("lui:datastructureTill2023ComponentsSet").ToString());
                 model.DownloadDatasetId = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
             }
             else
             {
-                selectedDataStructureId = (int)settings.GetValueByKey("lui:datastructureDefaultComponentsSet");
+                selectedDataStructureId = int.Parse(settings.GetValueByKey("lui:datastructureDefaultComponentsSet").ToString());
                 model.DownloadDatasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
 
             }

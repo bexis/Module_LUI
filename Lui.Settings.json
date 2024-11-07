@@ -45,7 +45,7 @@
     {
       "key": "lui:datasetDefaultComponentsSet",
       "title": "dataset default componentsSet",
-      "value": 31661,
+      "value": 25086,
       "description": "",
       "type": "Int16",
       "options": []
@@ -86,6 +86,30 @@
       "key": "lui:filename:namespace",
       "title": "filename:namespace",
       "value": "LUI",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "lui:msg:alb",
+      "title": "",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "lui:msg:hai",
+      "title": "",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "lui:msg:sch",
+      "title": "",
+      "value": "",
       "description": "",
       "type": "String",
       "options": []
