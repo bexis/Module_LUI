@@ -7,6 +7,18 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.4/css/select.dataTables.min.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/select/1.3.4/js/dataTables.select.min.js"></script>
+
+
+
+}
+
+@{
+    List<string> warnings = new List<string>();
+
+    if (ViewData["Warnings"] != null)
+    {
+        warnings = (List<string>)ViewData["Warnings"];
+    }
 }
 
 <h3>LUI Compontents Calculation</h3>
@@ -44,13 +56,25 @@
         </tbody>
     </table>
     <br />
-    @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
-    <button onclick="upload()" class="bx-button function">Upload selected rows</button><br />
-    <div id="error" style="font-weight:bold;"></div>
 
-}
+    <div>
+        @for (int c = 0; c < warnings.Count; c++)
+        {
+            <div>
+                @warnings[c].ToString()
+            </div>
+        }
+    </div>
 
-<script type="text/javascript">
+        <br />
+        @Html.ActionLink("Download (csv)", "Download", "LUIComponentCalculation", new { @class = "bx-button function" })
+        <button onclick="upload()" class="bx-button function">Upload selected rows</button>
+        <br />
+        <div id="error" style="font-weight:bold;"></div>
+
+        }
+
+        <script type="text/javascript">
     var tbl;
     $(document).ready(function () {
         tbl = $('#compontentData').DataTable({
@@ -91,4 +115,4 @@
         });
     }
 
-</script>
+        </script>
