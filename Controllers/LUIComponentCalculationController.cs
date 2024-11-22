@@ -52,8 +52,10 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
             LUIComponentsCalculation lUIComponentsCalculation = new LUIComponentsCalculation(lanuData, lanuFullData, plotTypes);
             DataTable compData = lUIComponentsCalculation.CalculateComponents();
+            
             ComponentDataModel model = new ComponentDataModel(compData);
             Session["ComponentData"] = model;
+            ViewData["Warnings"] = lUIComponentsCalculation.warnings;
 
             return View("ComponentCalculation", model);
         }

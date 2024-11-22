@@ -19,7 +19,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             plotTypes = plotTypesData;
             warnings = new List<string>();
 
-            // importnant step, where some NAs are replaced by values
+            // important step, where some NAs are replaced by values
             DataCorrections();
         }
 
@@ -160,7 +160,8 @@ namespace BExIS.Modules.Lui.UI.Helper
                     .Select(b => b.Field<double>("Manure_tha") * 0).ToList());
 
                     // check for mean implementation (done in 2023, therefore 17 years = 17 entries per plot)
-                    // check for mean implementation (year < 2020 used, therefore 14 years = 14 entries per plot)
+                    // should use the follwouing implementation because we use years < 2019 only
+                    // check for mean implementation (year < 2019 used, therefore 13 years = 13 entries per plot)
                     if (manureListOnePlotAllYears.Count()!=13)
                     {
                         var ta = row.Field<DateTime>("Year").Year;
@@ -179,6 +180,12 @@ namespace BExIS.Modules.Lui.UI.Helper
                 if (ExactValOrgY0 == "ja" && NorgManure > 0)
                 {
                     NorgManure = row.Field<double>("NorgExact");
+                }
+                // if NA is entered in the raw data (would be a negative value as placeholder)
+                else if (NorgManure < 0)
+                {
+                    NorgManure = 0;
+                    warnings.Add("NorgManure == NA for Plot: " + row.Field<string>("EP_PlotID") + " and Year: " + row.Field<DateTime>("Year").ToString("yyyy") + ". Replaced by 0.");
                 }
                 else
                 {
@@ -213,8 +220,7 @@ namespace BExIS.Modules.Lui.UI.Helper
                 double NorgManureY2 = 0;
                 // to hold the effectice manure (after using the 40-30-30 rule)
                 double NorgManureEff = 0;
-
-
+                                                
                 // our data starts in the year 2006, therefore no data from the earlier times exits
                 // we simulate the manure rule by calculating the mean of the existing data (after 2006), this world becuase the rule was introduced later where already data exists
                 if (year == 2006)
@@ -238,6 +244,12 @@ namespace BExIS.Modules.Lui.UI.Helper
                         if (ExactValOrgY1 == "ja" && NorgManureY1 > 0)
                         {
                             NorgManureY1 = NorgManureY1data.Field<double>("NorgExact");
+                        }
+                        // if NA is entered in the raw data (would be a negative value as placeholder)
+                        else if (NorgManureY1 < 0)
+                        {
+                            NorgManureY1 = 0;
+                            warnings.Add("NorgManure1 == NA for Plot: " + row.Field<string>("EP_PlotID") + " and Year: " + row.Field<DateTime>("Year").ToString("yyyy") + ". Replaced by 0.");
                         }
                         else
                         {
@@ -280,6 +292,12 @@ namespace BExIS.Modules.Lui.UI.Helper
                             {
                                 NorgManureY2 = NorgManureY2data.Field<double>("NorgExact");
                             }
+                            // if NA is entered in the raw data (would be a negative value as placeholder)
+                            else if (NorgManureY2 < 0)
+                            {
+                                NorgManureY2 = 0;
+                                warnings.Add("NorgManure2 == NA for Plot: " + row.Field<string>("EP_PlotID") + " and Year: " + row.Field<DateTime>("Year").ToString("yyyy") + ". Replaced by 0.");
+                            }
                             else
                             {
                                 switch (NorgManureY2data.Field<string>("TypeManure"))
@@ -317,6 +335,12 @@ namespace BExIS.Modules.Lui.UI.Helper
                 if (ExactValOrgY0 == "ja" && NorgSlurry > 0)
                 {
                     NorgSlurry = row.Field<double>("NorgExact");
+                }
+                // if NA is entered in the raw data (would be a negative value as placeholder)
+                else if (NorgSlurry < 0)
+                {
+                    NorgSlurry = 0;
+                    warnings.Add("NorgSlurry == NA for Plot: " + row.Field<string>("EP_PlotID") + " and Year: " + row.Field<DateTime>("Year").ToString("yyyy") + ". Replaced by 0.");
                 }
                 else
                 {
@@ -378,7 +402,8 @@ namespace BExIS.Modules.Lui.UI.Helper
                 Norg = NorgManureEff + NorgSlurry + NorgBiogas;
                                 
                 // Calculate TotalFertilization (organic + mineral)
-                // Check if minN is a value
+                // Check if minN is a value (use 0 if value < 0)
+                // Warning is added in DataCorrection method
                 var temp_minN = row.Field<double>("minNitrogen_kgNha") < 0 ? 0 : row.Field<double>("minNitrogen_kgNha");
                 // calculate
                 var TotalFertilization = temp_minN + Norg;
@@ -406,19 +431,25 @@ namespace BExIS.Modules.Lui.UI.Helper
         private void DataCorrections()
         {
             // Interpolate missing data of fertilization -> not needed because the case is very rare
+            // very rare? but we would still need its, now it is done in the calculation at 4 places, see below, 
+                //// if NA is entered in the raw data (would be a negative value as placeholder)
+                //    else if (NorgManure < 0)
+                //{
+                //    NorgManure = 0;
+                //}
 
             // replacing - 1(-888888) not needed because it is not allowed in the original data template
-            var slurryNAs = landuseData.AsEnumerable().Where(r => r.Field<double>("Slurry_m3ha") == -999999 && r.Field<string>("TypeSlurry") == "999999");
+            var slurryNAs = landuseData.AsEnumerable().Where(r => r.Field<double>("Slurry_m3ha") == -999999 && r.Field<string>("TypeSlurry") != "-1");
             foreach(var row in slurryNAs)
             {
-                warnings.Add("Slurry_m3ha and TypeSlurry == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<DateTime>("Year").ToString("yyyy"));
+                warnings.Add("Slurry_m3ha = NA and TypeSlurry = defined or NA (!= -1) for Plot: " + row.Field<string>("EP_PlotID") + " and Year: " + row.Field<DateTime>("Year").ToString("yyyy"));
             }
 
             // replacing - 1(-888888) not needed because it is not allowed in the original data template
             var NitrogenNAs = landuseData.AsEnumerable().Where(r => r.Field<double>("minNitrogen_kgNha") == -999999);
             foreach (var row in NitrogenNAs)
             {
-                warnings.Add("NitrogenNAs == NA for Plot: " + row.Field<string>("EP_PlotID") + "and Year: " + row.Field<DateTime>("Year").ToString("yyyy"));
+                warnings.Add("NitrogenNAs == NA for Plot: " + row.Field<string>("EP_PlotID") + " and Year: " + row.Field<DateTime>("Year").ToString("yyyy"));
             }
 
             // Replace NA in GrazingArea with Zeros ; replacing -1 (-888888) not needed because it is not allowed in the original data template
