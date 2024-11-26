@@ -250,19 +250,20 @@ namespace BExIS.Modules.Lui.UI.Controllers
         /// Get server information form json file in workspace
         /// </summary>
         /// <returns></returns>
-        public  ServerInformation GetServerInformation()
+        /// <summary>
+        /// Get server information form json file in workspace
+        /// </summary>
+        /// <returns></returns>
+        private ServerInformation GetServerInformation()
         {
-            //string filePath = Path.Combine(AppConfiguration.GetModuleWorkspacePath("LUI"), "Credentials.json");
-            //string text = System.IO.File.ReadAllText(filePath);
             ServerInformation serverInformation = new ServerInformation();
             var uri = System.Web.HttpContext.Current.Request.Url;
             serverInformation.ServerName = uri.GetLeftPart(UriPartial.Authority) + "/";
-            serverInformation.Token = GetUserToken();
-
+            var settings = ModuleManager.GetModuleSettings("lui");
+            serverInformation.UsernamePassword = settings.GetValueByKey("username") + ":" + settings.GetValueByKey("password");
 
             return serverInformation;
         }
-
 
         private int[] CheckDuplicates(DataTable newCompData, int[] rowIds)
         {

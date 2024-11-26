@@ -30,7 +30,9 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string link = serverInformation.ServerName + "/api/metadata/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
 
             XmlDocument document = new XmlDocument();
 
@@ -55,7 +57,9 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
 
             List<ApiDataStatisticModel> statistics = GetStatistic(datasetId, serverInformation);
 
@@ -141,7 +145,10 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string link = serverInformation.ServerName + "/api/datastatistic/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
+
 
             List<ApiDataStatisticModel> data = new List<ApiDataStatisticModel>();
 
@@ -217,7 +224,10 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string link = serverInformation.ServerName + "/api/dataset/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
+
 
             DatasetObject datasetObject = new DatasetObject();
 
@@ -250,7 +260,10 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string link = serverInformation.ServerName + "/api/structures/" + structId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
+
 
             DataStructureObject dataStructureObject = new DataStructureObject();
 
@@ -288,8 +301,10 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             string link = serverInformation.ServerName + "/api/data/" + datasetId;
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            //request.PreAuthenticate = true;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
+
 
             DataTable epPlotTable = new DataTable();
             epPlotTable.Columns.Add("EP_Plotid");
@@ -345,8 +360,11 @@ namespace BExIS.Modules.Lui.UI.Helper
         {
             string link = serverInformation.ServerName + "/api/Data/";
             HttpWebRequest request = WebRequest.Create(link) as HttpWebRequest;
-            //request.PreAuthenticate = true;
-            request.Headers.Add("Authorization", "Bearer " + serverInformation.Token);
+            request.UseDefaultCredentials = true;
+            string myCredentials = Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(serverInformation.UsernamePassword));
+            request.Headers.Add("Authorization", "Basic " + myCredentials);
+
+
             request.Method = "PUT";
             request.ContentType = "application/json";
 

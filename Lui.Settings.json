@@ -113,6 +113,22 @@
       "description": "",
       "type": "String",
       "options": []
+    },
+    {
+      "key": "username",
+      "title": "Username",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
+    },
+    {
+      "key": "password",
+      "title": "Password",
+      "value": "",
+      "description": "",
+      "type": "String",
+      "options": []
     }
 
 
