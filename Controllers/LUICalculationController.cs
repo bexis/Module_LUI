@@ -340,42 +340,44 @@ namespace BExIS.Modules.Lui.UI.Controllers
             //messsage for log
             string logMessage = "";
 
-           
+
             //send mail
-            var es = new EmailService();
-            string user;
-
-            LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
-
-            var settings = ModuleManager.GetModuleSettings("lui");
-
-            string datasetId;
-            if (model.ComponentsSet.SelectedValue == "historic set till 2019")
-                datasetId = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
-
-            else if (model.ComponentsSet.SelectedValue == "historic set till 2023")
-                datasetId = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
-            else
-                datasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
-
-            string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version;
-
-            if (model.IsPublicAccess)
+            using (var es = new EmailService())
             {
-                user = "public downloaded";
-                logMessage = "LUI Calculation public download. Id: " + datasetId + ", Version: " + version + "";
-            }
-            else
-            {
-                logMessage = "LUI Calculation download. Id: " + datasetId + ", Version: " + version + "";
-                using (UserManager userManager = new UserManager())
+                string user;
+
+                LUIQueryModel model = (LUIQueryModel)Session["LUICalModel"];
+
+                var settings = ModuleManager.GetModuleSettings("lui");
+
+                string datasetId;
+                if (model.ComponentsSet.SelectedValue == "historic set till 2019")
+                    datasetId = settings.GetValueByKey("lui:datasetTill2019ComponentsSet").ToString();
+
+                else if (model.ComponentsSet.SelectedValue == "historic set till 2023")
+                    datasetId = settings.GetValueByKey("lui:datasetTill2023ComponentsSet").ToString();
+                else
+                    datasetId = settings.GetValueByKey("lui:datasetDefaultComponentsSet").ToString();
+
+                string version = DataAccess.GetDatasetInfo(datasetId, GetServerInformation()).Version;
+
+                if (model.IsPublicAccess)
                 {
-                    user = "downloaded by " + userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
+                    user = "public downloaded";
+                    logMessage = "LUI Calculation public download. Id: " + datasetId + ", Version: " + version + "";
                 }
-            }
+                else
+                {
+                    logMessage = "LUI Calculation download. Id: " + datasetId + ", Version: " + version + "";
+                    using (UserManager userManager = new UserManager())
+                    {
+                        user = "downloaded by " + userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
+                    }
+                }
 
-            string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was  <b>" + user + "</b>";
-            es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
+                string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was  <b>" + user + "</b>";
+                es.Send("LUI data was downloaded (Id: " + datasetId + ", Version: " + version + ")", text, "bexis-sys@listserv.uni-jena.de");
+            }
 
             Vaiona.Logging.LoggerFactory.LogCustom(logMessage);
 
