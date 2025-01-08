@@ -116,9 +116,7 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                                     if (data.Columns[j].DataType == typeof(DateTime))
                                     {
-                                            var format = dataStructureObject.Variables.Where(e => e.Label == data.Columns[j].ColumnName).FirstOrDefault().DataType;
-                                            format = format.Split('-').ToArray()[1];
-                                            dr[data.Columns[j].ColumnName] = ParseValue(data.Columns[j].DataType.ToString(), value, format);
+                                        dr[data.Columns[j].ColumnName] = DateTime.ParseExact(value, "yyyy", new CultureInfo("en-US"));
                                     }
                                     else
                                         dr[data.Columns[j].ColumnName] = value;
