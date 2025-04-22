@@ -67,10 +67,10 @@ namespace BExIS.Modules.Lui.UI.Helper
 
             //create datatable using data structure info
             DataTable data = new DataTable();
-            foreach (var variable in dataStructureObject.Variables)
+            foreach (var variable in dataStructureObject.variables)
             {
-                DataColumn col = new DataColumn(variable.Label);
-                col.DataType = System.Type.GetType("System." + variable.SystemType);
+                DataColumn col = new DataColumn(variable.label);
+                col.DataType = System.Type.GetType("System." + variable.systemType);
                 col.AllowDBNull = true;
                 data.Columns.Add(col);
             }

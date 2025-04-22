@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BExIS.IO.Transform.Output;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -25,25 +26,52 @@ namespace BExIS.Modules.Lui.UI.Models
     /// <returns></returns>
     public class DataStructureObject
     {
-        public string Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string inUse { get; set; }
-        public string Structured { get; set; }
-        public List<Variables> Variables { get; set; }
+        public int id { get; set; }
+        public string title { get; set; }
+        public string desciption { get; set; }
+        public bool inUse { get; set; }
+        public List<Variable> variables { get; set; }
     }
 
-    public class Variables
+    public class Constraint
     {
-        public string Id { get; set; }
-        public string Label { get; set; }
-        public string Description { get; set; }
-        public string isOptional { get; set; }
-        public string Unit { get; set; }
-        public string DataType { get; set; }
-        public string SystemType { get; set; }
-        public string AttributeName { get; set; }
-        public string AttributeDescription { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public string description { get; set; }
+    }
+
+    public class Unit
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string abbrevation { get; set; }
+        public string description { get; set; }
+        public Dimension dimension { get; set; }
+        public string measurementSystem { get; set; }
+    }
+
+    public class Dimension
+    {
+        public string name { get; set; }
+        public string description { get; set; }
+        public string specification { get; set; }
+    }
+
+    public class Variable
+    {
+        public int id { get; set; }
+        public string label { get; set; }
+        public string description { get; set; }
+        public bool isOptional { get; set; }
+        public string dataType { get; set; }
+        public string systemType { get; set; }
+        public string displayPattern { get; set; }
+        public Unit unit { get; set; }
+        public List<object> missingValues { get; set; }
+        public Template template { get; set; }
+        public List<object> meanings { get; set; }
+        public List<Constraint> constraints { get; set; }
     }
 
     /// <summary>

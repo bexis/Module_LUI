@@ -249,6 +249,10 @@
       <Project>{681C8BC4-55F0-4F43-A685-90E246A88CB1}</Project>
       <Name>BExIS.Security.Services</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Components\IO\BExIS.IO.Transform.Output\BExIS.IO.Transform.Output.csproj">
+      <Project>{455EC826-9A92-40FF-BD3B-388C288955CE}</Project>
+      <Name>BExIS.IO.Transform.Output</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Components\Utils\BExIS.Utils.Config\BExIS.Utils.Config.csproj">
       <Project>{6EAD7D02-02F7-42FF-85E4-90BB892D3846}</Project>
       <Name>BExIS.Utils.Config</Name>
