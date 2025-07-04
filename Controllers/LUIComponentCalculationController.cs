@@ -168,8 +168,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
                             DataRow row = copy.AsEnumerable().Where(a => a.Field<int>("Id") == id).FirstOrDefault();
                             row.Table.Columns.Remove("Id");
 
-                            string[] stringArray = row.ItemArray.Cast<string>().ToArray();
-                            dataArrays.Add(stringArray);
+                        string[] stringArray = row.ItemArray
+                        .Select(item => item?.ToString() ?? string.Empty)
+                        .ToArray(); 
+                    
+                        dataArrays.Add(stringArray);
 
                             if (idsToUpload.Last() == id)
                                 result += id.ToString() + " ";
@@ -203,8 +206,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string jwt_token = "";
             try
             {
-                using (var identityUserService = new IdentityUserService())
                 using (var userManager = new UserManager())
+                using (var identityUserService = new IdentityUserService(userManager))
                 {
                     var jwtConfiguration = GeneralSettings.JwtConfiguration;
 
