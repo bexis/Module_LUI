@@ -25,6 +25,14 @@ namespace BExIS.Modules.Lui.UI.Controllers
 {
     public class LUIComponentCalculationController : Controller
     {
+
+        private readonly UserManager _userManager;
+
+        public LUIComponentCalculationController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
+
         // GET: LUIComponentCalculation
         public ActionResult Index()
         {
@@ -206,14 +214,11 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string jwt_token = "";
             try
             {
-                using (var userManager = new UserManager())
-                using (var identityUserService = new IdentityUserService(userManager))
-                {
                     var jwtConfiguration = GeneralSettings.JwtConfiguration;
 
                     long userId = 0;
                     long.TryParse(this.User.Identity.GetUserId(), out userId);
-                    var user = userManager.FindByIdAsync(userId).Result;
+                    var user = _userManager.FindByIdAsync(userId).Result;
                     //var user = identityUserService.FindById(userId);
 
                     if (user != null)
@@ -239,7 +244,6 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
                         jwt_token = new JwtSecurityTokenHandler().WriteToken(token);
                     }
-                }
             }
             catch
             {
