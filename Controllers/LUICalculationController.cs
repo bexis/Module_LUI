@@ -31,6 +31,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
 {
     public class LUICalculationController : Controller
     {
+        private readonly UserManager _userManager;
+
+        public LUICalculationController(UserManager userManager)
+        {
+            _userManager = userManager;
+        }
         #region constants
         // page title
         private static string TITLE = "LUI Calculation";
@@ -369,10 +375,8 @@ namespace BExIS.Modules.Lui.UI.Controllers
                 else
                 {
                     logMessage = "LUI Calculation download. Id: " + datasetId + ", Version: " + version + "";
-                    using (UserManager userManager = new UserManager())
-                    {
-                        user = "downloaded by " + userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
-                    }
+
+                    user = "downloaded by " + _userManager.FindByNameAsync(HttpContext.User.Identity.Name).Result.DisplayName;
                 }
 
                 string text = "LUI Calculation file <b>\"" + Path.GetFileName(pathData) + "\"</b> with id <b>(" + datasetId + ")</b> version <b>(" + version + ")</b> was  <b>" + user + "</b>";
@@ -470,14 +474,12 @@ namespace BExIS.Modules.Lui.UI.Controllers
             string jwt_token = "";
             try
             {
-                using (var userManager = new UserManager())
-                using (var identityUserService = new IdentityUserService(userManager))
-                {
+
                     var jwtConfiguration = GeneralSettings.JwtConfiguration;
 
                     long userId = 0;
                     long.TryParse(this.User.Identity.GetUserId(), out userId);
-                    var user = userManager.FindByIdAsync(userId).Result;
+                    var user = _userManager.FindByIdAsync(userId).Result;
                     //var user = identityUserService.FindById(userId);
                   
                     if (user != null)
@@ -503,7 +505,6 @@ namespace BExIS.Modules.Lui.UI.Controllers
 
                          jwt_token = new JwtSecurityTokenHandler().WriteToken(token);  
                     }
-                }
             }
             catch
             {
