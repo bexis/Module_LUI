@@ -116,7 +116,29 @@ namespace BExIS.Modules.Lui.UI.Helper
 
                                     if (data.Columns[j].DataType == typeof(DateTime))
                                     {
-                                        dr[data.Columns[j].ColumnName] = DateTime.ParseExact(value, "yyyy", new CultureInfo("en-US"));
+                                        DateTime parsedDate;
+
+                                        if (DateTime.TryParseExact(
+                                                value.ToString(),
+                                                "yyyy",
+                                                CultureInfo.InvariantCulture,
+                                                DateTimeStyles.None,
+                                                out parsedDate))
+                                        {
+                                            dr[data.Columns[j].ColumnName] = parsedDate;
+                                        }
+                                        else if (DateTime.TryParse(
+                                                    value.ToString(),
+                                                    CultureInfo.InvariantCulture,
+                                                    DateTimeStyles.None,
+                                                    out parsedDate))
+                                        {
+                                            dr[data.Columns[j].ColumnName] = parsedDate;
+                                        }
+                                        else
+                                        {
+                                            dr[data.Columns[j].ColumnName] = DBNull.Value;
+                                        }
                                     }
                                     else
                                         dr[data.Columns[j].ColumnName] = value;
@@ -132,7 +154,7 @@ namespace BExIS.Modules.Lui.UI.Helper
             }
             catch (Exception e)
             {
-
+                throw new Exception("Fehler beim Lesen der CSV/API-Daten", e);
             }
 
 
